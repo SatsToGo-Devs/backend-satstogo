@@ -78,11 +78,11 @@ WSGI_APPLICATION = 'sattogo.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'satstogo',
-        'USER': 'sats',
-        'PASSWORD': 'satssats',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': 'railway',
+        'USER': 'postgres',
+        'PASSWORD': 'EzBhayPDUDirDYDScmVGImGscHwGGSDw',
+        'HOST': 'monorail.proxy.rlwy.net',
+        'PORT': '37831',
     }
 }
 
