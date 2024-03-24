@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'api',
+    'organizer'
 ]
 
 MIDDLEWARE = [
@@ -82,11 +83,11 @@ WSGI_APPLICATION = 'sattogo.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'dedan',
-        'USER': 'dedan',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': 'railway',
+        'USER': 'postgres',
+        'PASSWORD': 'EzBhayPDUDirDYDScmVGImGscHwGGSDw',
+        'HOST': 'monorail.proxy.rlwy.net',
+        'PORT': '37831',
     }
 }
 
