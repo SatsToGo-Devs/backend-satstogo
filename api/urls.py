@@ -1,7 +1,8 @@
 from django.urls import path
-from .views import login_view, get_magic_string
+from .views import auth_view, auth_verify_view,auth_login_view
 
 urlpatterns = [
-    path('login/', login_view, name='login'),
-    path('magic-string/', get_magic_string, name='magic-string'),
+    path('auth-verify/', auth_verify_view, name='auth-verify/'),
+    path('auth-login/', auth_login_view, name='auth-login'),
+    path('auth/', auth_view, name='auth'),
 ]
