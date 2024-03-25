@@ -27,7 +27,7 @@ class RewardView(APIView):
         is_unique = request.GET.get("is_unique")
         webhook_url = request.GET.get("webhook_url")
         admin_key = request.GET.get("X-Api-Key")
-        import pdb; pdb.set_trace()
+        
         # Assuming you construct the JSON payload
         payload = {
             "title": "Test1",
