@@ -23,6 +23,8 @@ load_dotenv()
 
 LNURL_ENDPOINT = os.environ.get('LNURL_ENDPOINT')
 ADMIN_API_KEY = os.environ.get('ADMIN_API_KEY')
+INVOICE_READ_KEY = os.environ.get('INVOICE_READ_KEY')
+LNURL_PAYMENTS_ENDPOINT = os.environ.get("LNURL_PAYMENTS_ENDPOINT")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
