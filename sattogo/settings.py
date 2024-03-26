@@ -10,12 +10,22 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+load_dotenv()
+
+
+LNURL_ENDPOINT = os.environ.get('LNURL_ENDPOINT')
+ADMIN_API_KEY = os.environ.get('ADMIN_API_KEY')
+INVOICE_READ_KEY = os.environ.get('INVOICE_READ_KEY')
+LNURL_PAYMENTS_ENDPOINT = os.environ.get("LNURL_PAYMENTS_ENDPOINT")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -26,10 +36,7 @@ SECRET_KEY = 'django-insecure-=v01e2dw6t6%qsqvzhxruoo=6psu559pwd4(1gc7=&0_l&$8^g
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    'moose-fair-publicly.ngrok-free.app'
-]
-
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
