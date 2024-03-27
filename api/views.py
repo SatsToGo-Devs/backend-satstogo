@@ -14,7 +14,7 @@ import os
 import random
 import string
 import asyncio
-import datetime
+import lnurl
 import random
 import segno
 import api.consumers as consumers
@@ -56,8 +56,8 @@ class AuthView(APIView):
         random_data = os.urandom(32)
         hex_data = '00' + random_data.hex()[2:64]
         base_uri=request.build_absolute_uri('/')
-        qrcode = segno.make_qr(f"{base_uri}api/auth-verify/?tag=login&k1={hex_data}&action=login").svg_data_uri(scale=10)
-        return JsonResponse({"status": "OK","qrcode":qrcode,"magic_string":hex_data})
+        auth_url=f"{base_uri}api/auth-verify/?tag=login&k1={hex_data}&action=login"
+        return JsonResponse({"status": "OK","magic_string":hex_data,"auth_url":auth_url})
 
     async def auth_verify_view(request):
         k1 = request.GET.get('k1')
