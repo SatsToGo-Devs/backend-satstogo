@@ -1,17 +1,9 @@
 
 # SATSTOGO BACKEND
-Please install the following packages before proceeding:
+Please install the necessary packages before proceeding:
 
 ```
-pip install secp256k1
-pip install segno
-pip install websockets
-pip install python-dotenv
-pip install grpcio
-pip install protobuf
-pip install requests
-pip install lnurl
-pip install -U 'channels[daphne]'
+pip install -r requirements.txt
 ```
 
 To run the project, use the command:
