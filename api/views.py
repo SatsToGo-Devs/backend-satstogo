@@ -82,7 +82,6 @@ class AuthView(APIView):
 
 class RewardView(APIView):
     def generate_lnurl(self, request):
-       
         title = request.GET.get("title")
         min_withdrawable = request.GET.get("min_withdrawable")
         max_withdrawable = request.GET.get("max_withdrawable")
@@ -93,9 +92,9 @@ class RewardView(APIView):
         admin_key = request.GET.get("X-Api-Key")
         
         payload = {
-            "title": "Test1",
-            "min_withdrawable": 10,
-            "max_withdrawable": 20,
+            "title": title,
+            "min_withdrawable": int(min_withdrawable),
+            "max_withdrawable": int(max_withdrawable),
             "is_unique": True,
             "uses": 1, 
             "wait_time": 1
