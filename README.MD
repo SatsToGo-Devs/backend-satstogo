@@ -19,7 +19,7 @@ The following flow is expected for the authentication APIs:
 
 2. To register a new user, make a GET API call to `api/auth/`. This endpoint responds with:
     ```json
-    {"status": "OK","magic_string":hex_data,"auth_url":auth_url}
+    {"status": "OK","magic_string":hex_data,"auth_url":auth_url,"encoded":encoded}
     ```
     After you get this reponse, please open a websocket connection at `ws/notifications/{k1}/` where k1 is the magic string received.
 
