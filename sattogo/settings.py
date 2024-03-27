@@ -41,6 +41,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -60,7 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'api.middleware.RequestLoggingMiddleware',
+    # 'api.middleware.RequestLoggingMiddleware',
 ]
 
 ROOT_URLCONF = 'sattogo.urls'
@@ -82,7 +83,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'sattogo.wsgi.application'
+ASGI_APPLICATION = 'sattogo.asgi.application'
 
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
