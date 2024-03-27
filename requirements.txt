@@ -22,3 +22,7 @@ sqlparse==0.4.4
 types-protobuf==4.24.0.20240311
 urllib3==2.2.1
 utils==1.0.2
+secp256k1
+segno
+websockets
+channels[daphne]
