@@ -25,11 +25,24 @@ from django.contrib.auth.models import User
 from rest_framework import status
 from django.conf import settings
 from rest_framework.response import Response
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 ADMIN_API_KEY = settings.ADMIN_API_KEY
 LNURL_ENDPOINT = settings.LNURL_ENDPOINT
 INVOICE_READ_KEY = settings.INVOICE_READ_KEY
 LNURL_PAYMENTS_ENDPOINT = settings.LNURL_PAYMENTS_ENDPOINT
+
+def trigger_payment_success_event(invoice):
+    channel_layer = get_channel_layer()
+    import pdb; pdb.set_trace()
+    async_to_sync(channel_layer.group_send)(
+        'invoice_updates',
+        {
+            'type': 'send_invoice_update',
+            'message': f'Payment successful for invoice: {invoice}'
+        }
+    )
 
 class AuthView(APIView):
     def auth_login_view(request):
@@ -122,12 +135,21 @@ class RewardView(APIView):
         # Call the generate_lnurl method
         return self.generate_lnurl(request)
     
+    
+async def send_invoice_update_message(self, invoice):
+    try:
+        await self.channel_layer.group_send(
+            "invoice_updates", {"type": "send_invoice_update", "message": f"Payment successful for invoice: {invoice}"}
+        )
+    except Exception as e:
+        print("Error sending WebSocket message:", e)
 
 class WithdrawCallbackView(APIView):
     def get(self, request):
         # Extract k1 token and Lightning invoice from query parameters
         k1_token = request.GET.get('k1')
         invoice = request.GET.get('invoice')
+
         # create_invoice = {
         #         "unit": "sat",
         #         "internal": False,
@@ -137,13 +159,20 @@ class WithdrawCallbackView(APIView):
         # }
         # headers = {"Content-type": "application/json", "X-Api-Key": INVOICE_READ_KEY}
         # response = requests.post(LNURL_PAYMENTS_ENDPOINT, json=create_invoice, headers=headers)
-        # Assuming response.content contains the JSON data
+    
         # response_data = json.loads(response.content.decode('utf-8'))
         # payment_request = response_data.get("payment_request")
+
         pay_invoice = {
             "out": True,
             "bolt11": invoice,
         }
         payment_headers = {"Content-type": "application/json", "X-Api-Key": ADMIN_API_KEY}
         payment_response = requests.post(LNURL_PAYMENTS_ENDPOINT, json=pay_invoice, headers=payment_headers)
+        import pdb; pdb.set_trace()
+        if payment_response.status_code == 201:
+            try:
+                trigger_payment_success_event(invoice)
+            except Exception as e:
+                print("Error sending WebSocket message:", e)
         return Response(payment_response.json())
