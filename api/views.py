@@ -169,7 +169,6 @@ class WithdrawCallbackView(APIView):
         }
         payment_headers = {"Content-type": "application/json", "X-Api-Key": ADMIN_API_KEY}
         payment_response = requests.post(LNURL_PAYMENTS_ENDPOINT, json=pay_invoice, headers=payment_headers)
-        import pdb; pdb.set_trace()
         if payment_response.status_code == 201:
             try:
                 trigger_payment_success_event(invoice)
