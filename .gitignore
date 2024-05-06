@@ -1,3 +1,5 @@
 .history/
 sats/
 media/
+venv/
+__pycache__/
