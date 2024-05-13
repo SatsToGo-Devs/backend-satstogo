@@ -98,11 +98,11 @@ CHANNEL_LAYERS = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'sats',
-        'USER': 'dedan',
-        'PASSWORD': 'dedan',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': 'railway',
+        'USER': 'postgres',
+        'PASSWORD': 'EzBhayPDUDirDYDScmVGImGscHwGGSDw',
+        'HOST': 'monorail.proxy.rlwy.net',
+        'PORT': '37831',
     }
 }
 
