@@ -7,7 +7,7 @@ from rest_framework import status, generics
 from rest_framework.decorators import api_view
 from datetime import datetime
 from .models import Event, Attendance,EventSession
-from api.models import User
+from api.models import SatsUser, User
 from .serializers import EventSerializer, EventReadSerializer, ConfirmEventSerialiazer
 
 class EventCrud(APIView):
@@ -59,7 +59,7 @@ class ActivateUser(APIView):
             try:
                 pk = request.data.get('pk')
                 magic_string = request.data.get('magic_string')
-                matching_user = User.objects.get(magic_string=magic_string)
+                matching_user = SatsUser.objects.get(magic_string=magic_string)
                 session = EventSession.objects.prefetch_related('parent_event').get(pk=pk)
                 parent_event = session.parent_event
                 formatted_datetime = datetime.now().time()
@@ -75,7 +75,7 @@ class ActivateUser(APIView):
                     is_activated = False
                 Attendance(user=matching_user,event=session,is_activated=is_activated).save()
                 print(responsedict)
-            except (User.DoesNotExist, EventSession.DoesNotExist):
+            except (SatsUser.DoesNotExist, EventSession.DoesNotExist):
                 responsedict = {'error': 'User or Event does not exist'}
                 status = 404
         else:

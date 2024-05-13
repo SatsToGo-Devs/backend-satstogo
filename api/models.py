@@ -55,3 +55,16 @@ class User(AbstractUser):
 		self.last_login = timezone.now()
 		self.save(update_fields=['last_login'])
 
+class SatsUser(models.Model):
+	magic_string = models.TextField(unique=True)
+	key = models.TextField()
+	sig = models.TextField()
+	created_at = models.DateTimeField(auto_now_add=True)
+	last_login = models.DateTimeField(auto_now_add=True)
+
+	def __str__(self):
+		return f"magic_string: {self.magic_string},key: {self.key},sig: {self.sig},created_at: {self.created_at}, last_login: {self.last_login}"
+
+	def update_last_login(self):
+		self.last_login = timezone.now()
+		self.save(update_fields=['last_login'])

@@ -9,7 +9,14 @@ pip install -r requirements.txt
 To run the project, use the command:
 
 ```
-python manage.py runserver
+python3 manage.py runserver
+```
+
+To run database migrations:
+
+```
+python3 manage.py makemigrations
+python3 manage.py migrate
 ```
 
 ## Authentication APIs

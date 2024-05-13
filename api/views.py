@@ -1,30 +1,23 @@
-import grpc
 import os
 import requests
-import json
-import codecs
-from lnurl import Lnurl
-from django.shortcuts import render
 from django.http import JsonResponse
 from binascii import unhexlify
 from secp256k1 import PublicKey
-from .models import User
-from django.utils import timezone
+from .models import SatsUser,SatsUser
 import os
 import random
 import string
-import asyncio
 import lnurl
 import random
-import segno
 import api.consumers as consumers
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import authentication, permissions
-from django.contrib.auth.models import User
 from rest_framework import status
 from django.conf import settings
 from rest_framework.response import Response
+from asgiref.sync import sync_to_async
+from django.views.decorators.csrf import csrf_exempt
+from django.db import IntegrityError
 
 ADMIN_API_KEY = settings.ADMIN_API_KEY
 LNURL_ENDPOINT = settings.LNURL_ENDPOINT
@@ -32,10 +25,11 @@ INVOICE_READ_KEY = settings.INVOICE_READ_KEY
 LNURL_PAYMENTS_ENDPOINT = settings.LNURL_PAYMENTS_ENDPOINT
 
 class AuthView(APIView):
+    @csrf_exempt
     def auth_login_view(request):
         try:
-            magic_str = request.GET.get('magic_string')
-            user = User.objects.get(magic_string=magic_str)
+            magic_str = request.GET.get('k1')
+            user = SatsUser.objects.get(magic_string=magic_str)
             pubkey = PublicKey(unhexlify(user.key), raw=True)
             sig_raw = pubkey.ecdsa_deserialize(unhexlify(user.sig))
             r = pubkey.ecdsa_verify(unhexlify(magic_str), sig_raw, raw=True)
@@ -45,13 +39,14 @@ class AuthView(APIView):
                 return JsonResponse({"status": "OK"})
             else:
                 return JsonResponse({"status": "ERROR", "message": "Unable to Verify Magic String"})
-        except User.DoesNotExist:
-            print("User not found with magic string:", magic_str)
+        except SatsUser.DoesNotExist:
+            print("SatsUser not found with magic string:", magic_str)
             return JsonResponse({"status": "ERROR", "message": "Magic String Not Found"})
-        except User.MultipleObjectsReturned:
+        except SatsUser.MultipleObjectsReturned:
             print("Multiple users found with magic string:", magic_str)
             return JsonResponse({"status": "ERROR", "message": "Multiple Magic String Found"})
 
+    @csrf_exempt
     def auth_view(request):
         random_data = os.urandom(32)
         hex_data = '00' + random_data.hex()[2:64]
@@ -73,8 +68,12 @@ class AuthView(APIView):
         sig_raw = pubkey.ecdsa_deserialize(unhexlify(sig))
         r = pubkey.ecdsa_verify(unhexlify(k1), sig_raw, raw=True)
         if(r == True):
-            user=User(magic_string=k1,key=key,sig=sig)
-            user.save()
+            try:
+                user=SatsUser(magic_string=k1,key=key,sig=sig)
+                await sync_to_async(user.save)()
+            except IntegrityError as e:
+                print(e)
+                
             await consumers.WebSocketConsumer.send_message(f"user_group_{k1}",{"type": "auth_verification","status": "OK","message":"Verification Successful"})
             return JsonResponse({"status": "OK"})
         else:
@@ -83,7 +82,6 @@ class AuthView(APIView):
     def generate_random_string(length):
         letters = string.ascii_lowercase
         return ''.join(random.choice(letters) for _ in range(length))
-
 
 class RewardView(APIView):
     def generate_lnurl(self, request):
@@ -122,7 +120,6 @@ class RewardView(APIView):
         # Call the generate_lnurl method
         return self.generate_lnurl(request)
     
-
 class WithdrawCallbackView(APIView):
     def get(self, request):
         # Extract k1 token and Lightning invoice from query parameters
