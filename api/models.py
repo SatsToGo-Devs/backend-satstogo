@@ -68,3 +68,11 @@ class SatsUser(models.Model):
 	def update_last_login(self):
 		self.last_login = timezone.now()
 		self.save(update_fields=['last_login'])
+
+class FcmToken(models.Model):
+	magic_string = models.TextField(unique=True)
+	token = models.TextField(unique=True)
+	created_at = models.DateTimeField(auto_now_add=True)
+
+	def __str__(self):
+		return f"magic_string: {self.magic_string},token: {self.token},created_at: {self.created_at}"

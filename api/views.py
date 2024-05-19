@@ -2,8 +2,9 @@ import os
 import requests
 from django.http import JsonResponse
 from binascii import unhexlify
+from api.utils.Utils import Utils
 from secp256k1 import PublicKey
-from .models import SatsUser,SatsUser
+from .models import FcmToken, SatsUser,SatsUser
 import os
 import random
 import string
@@ -50,6 +51,12 @@ class AuthView(APIView):
     def auth_view(request):
         random_data = os.urandom(32)
         hex_data = '00' + random_data.hex()[2:64]
+
+        try:
+            token = request.data.get('firebase_token')
+            fcmToken=FcmToken.objects.update_or_create(magic_string=hex_data,token=token)
+        except IntegrityError as e:
+            print(e)
         
         if request.is_secure():
             base_uri = request.build_absolute_uri('/')
@@ -75,6 +82,7 @@ class AuthView(APIView):
                 print(e)
                 
             await consumers.WebSocketConsumer.send_message(f"user_group_{k1}",{"type": "auth_verification","status": "OK","message":"Verification Successful"})
+            AuthView.notifyUserViaFcm(k1)
             return JsonResponse({"status": "OK"})
         else:
             return JsonResponse({"status": "ERROR", "message": "Unable to verify"})
@@ -82,6 +90,13 @@ class AuthView(APIView):
     def generate_random_string(length):
         letters = string.ascii_lowercase
         return ''.join(random.choice(letters) for _ in range(length))
+    
+    def notifyUserViaFcm(magic_str):
+        try:
+            fcmToken = FcmToken.objects.get(magic_string=magic_str)
+            Utils.send_notification([fcmToken.token],{"type": "auth_verification","status": "OK","message":"Verification Successful"})
+        except Exception as e:
+            print(f"An error occurred while saving the user: {e}")
 
 class RewardView(APIView):
     def generate_lnurl(self, request):
