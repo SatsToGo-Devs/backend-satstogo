@@ -101,12 +101,12 @@ class AuthView(APIView):
         letters = string.ascii_lowercase
         return ''.join(random.choice(letters) for _ in range(length))
     
-    def notifyUserViaFcm(magic_str):
+    async def notifyUserViaFcm(magic_str):
         try:
-            fcmToken = FcmToken.objects.get(magic_string=magic_str)
+            fcmToken = await sync_to_async(FcmToken.objects.get)(magic_string=magic_str)
             Utils.send_notification([fcmToken.token],{"type": "auth_verification","status": "OK","message":"Verification Successful"})
         except Exception as e:
-            print(f"An error occurred while saving the user: {e}")
+            print(f"An error occurred while sending FCM: {e}")
 
 class RewardView(APIView):
     def generate_lnurl(self, request):
