@@ -104,6 +104,7 @@ class AuthView(APIView):
     async def notifyUserViaFcm(magic_str):
         try:
             fcmToken = await sync_to_async(FcmToken.objects.get)(magic_string=magic_str)
+            print(f"FCM: {fcmToken}")
             Utils.send_notification([fcmToken.token],{"type": "auth_verification","status": "OK","message":"Verification Successful"})
         except Exception as e:
             print(f"An error occurred while sending FCM: {e}")
