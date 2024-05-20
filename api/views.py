@@ -1,3 +1,4 @@
+import json
 import os
 import requests
 from django.http import JsonResponse
@@ -48,13 +49,14 @@ class AuthView(APIView):
             return JsonResponse({"status": "ERROR", "message": "Multiple Magic String Found"})
 
     @csrf_exempt
-    def auth_view(request):
+    async def auth_view(request):
         random_data = os.urandom(32)
         hex_data = '00' + random_data.hex()[2:64]
 
         try:
-            token = request.data.get('firebase_token')
-            fcmToken=FcmToken.objects.update_or_create(magic_string=hex_data,token=token)
+            data = json.loads(await request.body().decode())
+            firebase_token = data.get('firebase_token')
+            fcmToken=FcmToken.objects.update_or_create(magic_string=hex_data,token=firebase_token)
         except IntegrityError as e:
             print(e)
         
