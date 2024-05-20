@@ -56,7 +56,7 @@ class AuthView(APIView):
         try:
             data = json.loads(request.body)
             firebase_token = data.get('firebase_token')
-            tk = FcmToken.objects.update_or_create(magic_string=hex_data, token=firebase_token)
+            tk = FcmToken.objects.update_or_create(magic_string=hex_data, token=firebase_token,defaults={'magic_string': hex_data,'token':firebase_token},)
             print(tk)
         except IntegrityError as e:
             print(e)

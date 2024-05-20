@@ -71,7 +71,7 @@ class SatsUser(models.Model):
 
 class FcmToken(models.Model):
 	magic_string = models.TextField(unique=True)
-	token = models.TextField(unique=True)
+	token = models.TextField()
 	created_at = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
