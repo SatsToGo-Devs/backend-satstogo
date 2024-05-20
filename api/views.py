@@ -49,14 +49,15 @@ class AuthView(APIView):
             return JsonResponse({"status": "ERROR", "message": "Multiple Magic String Found"})
 
     @csrf_exempt
-    async def auth_view(request):
+    def auth_view(request):
         random_data = os.urandom(32)
         hex_data = '00' + random_data.hex()[2:64]
 
         try:
-            data = json.loads(await request.body().decode())
+            data = json.loads(request.body)
             firebase_token = data.get('firebase_token')
-            fcmToken=FcmToken.objects.update_or_create(magic_string=hex_data,token=firebase_token)
+
+            sync_to_async(FcmToken.objects.update_or_create)(magic_string=hex_data, token=firebase_token)
         except IntegrityError as e:
             print(e)
         
@@ -65,8 +66,15 @@ class AuthView(APIView):
         else:
             base_uri = request.build_absolute_uri('/').replace('http:', 'https:')
 
-        auth_url=f"{base_uri}api/auth-verify/?tag=login&k1={hex_data}&action=login"
-        return JsonResponse({"status": "OK","magic_string":hex_data,"auth_url":auth_url,"encoded":lnurl.encode(auth_url)})
+        auth_url = f"{base_uri}api/auth-verify/?tag=login&k1={hex_data}&action=login"        
+        response = {
+            "status": "OK",
+            "magic_string": hex_data,
+            "auth_url": auth_url,
+            "encoded": lnurl.encode(auth_url)
+        }
+
+        return JsonResponse(response)
 
     async def auth_verify_view(request):
         k1 = request.GET.get('k1')
