@@ -20,6 +20,7 @@ python3 manage.py migrate
 ```
 
 ## Authentication APIs
+
 The following flow is expected for the authentication APIs:
 
 1. To Login a user, perform a GET request to the endpoint `api/auth-login/` with the param `k1`. A successful login reluts in the response: `{"status": "OK"}` while the opposite results: `{"status": "ERROR", "message": "Magic String Not Found"}`

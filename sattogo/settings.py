@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import dj_database_url
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -51,10 +52,11 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'api',
-    'events'
+    'events',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -64,7 +66,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # 'api.middleware.RequestLoggingMiddleware',
 ]
-
+CORS_ORIGIN_ALLOW_ALL=True
 ROOT_URLCONF = 'sattogo.urls'
 
 TEMPLATES = [
@@ -95,15 +97,23 @@ CHANNEL_LAYERS = {
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'sats',
+#         'USER': 'dedan',
+#         'PASSWORD': 'dedan',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'railway',
-        'USER': 'postgres',
-        'PASSWORD': 'EzBhayPDUDirDYDScmVGImGscHwGGSDw',
-        'HOST': 'monorail.proxy.rlwy.net',
-        'PORT': '37831',
-    }
+    'default': dj_database_url.config(
+        # Replace this value with your local database's connection string.
+        default='postgresql://postgres:dedan@localhost:5432/sats',
+        conn_max_age=600
+    )
 }
 
 
