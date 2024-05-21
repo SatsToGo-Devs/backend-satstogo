@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from binascii import unhexlify
 from api.utils.Utils import Utils
 from secp256k1 import PublicKey
-from .models import FcmToken, SatsUser,SatsUser
+from .models import FcmToken, SatsUser,SatsUser, SatsUserProfile
 import os
 import random
 import string
@@ -56,8 +56,12 @@ class AuthView(APIView):
         try:
             data = json.loads(request.body)
             firebase_token = data.get('firebase_token')
+            first_name = data.get('first_name')
+            last_name = data.get('last_name')
             tk = FcmToken.objects.update_or_create(magic_string=hex_data, token=firebase_token,defaults={'magic_string': hex_data,'token':firebase_token},)
+            p = SatsUserProfile.objects.update_or_create(magic_string=hex_data,defaults={'first_name': first_name,'last_name':last_name},)
             print(tk)
+            print(p)
         except IntegrityError as e:
             print(e)
         
@@ -92,7 +96,7 @@ class AuthView(APIView):
                 print(e)
                 
             await consumers.WebSocketConsumer.send_message(f"user_group_{k1}",{"type": "auth_verification","status": "OK","message":"Verification Successful"})
-            await AuthView.notifyUserViaFcm(k1)
+            await Utils.notifyUserViaFcm(k1)
             return JsonResponse({"status": "OK"})
         else:
             return JsonResponse({"status": "ERROR", "message": "Unable to verify"})
@@ -100,15 +104,6 @@ class AuthView(APIView):
     def generate_random_string(length):
         letters = string.ascii_lowercase
         return ''.join(random.choice(letters) for _ in range(length))
-    
-    async def notifyUserViaFcm(magic_str):
-        try:
-            print(f"magic_str: {magic_str}")
-            fcmToken = await sync_to_async(FcmToken.objects.get)(magic_string=magic_str)
-            print(f"FCM: {fcmToken}")
-            Utils.send_notification([fcmToken.token],{"type": "auth_verification","status": "OK","message":"Verification Successful"})
-        except Exception as e:
-            print(f"An error occurred while sending FCM: {e}")
 
 class RewardView(APIView):
     def generate_lnurl(self, request):
