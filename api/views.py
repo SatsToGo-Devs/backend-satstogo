@@ -37,8 +37,9 @@ class AuthView(APIView):
             r = pubkey.ecdsa_verify(unhexlify(magic_str), sig_raw, raw=True)
             if(r == True):
                 user.update_last_login()
-                print(user)
-                return JsonResponse({"status": "OK"})
+                profile = SatsUserProfile.objects.get(magic_string=magic_str)
+                print(profile)
+                return JsonResponse({"status": "OK","data": profile})
             else:
                 return JsonResponse({"status": "ERROR", "message": "Unable to Verify Magic String"})
         except SatsUser.DoesNotExist:
@@ -59,9 +60,9 @@ class AuthView(APIView):
             first_name = data.get('first_name')
             last_name = data.get('last_name')
             tk = FcmToken.objects.update_or_create(magic_string=hex_data, token=firebase_token,defaults={'magic_string': hex_data,'token':firebase_token},)
-            p = SatsUserProfile.objects.update_or_create(magic_string=hex_data,defaults={'first_name': first_name,'last_name':last_name},)
+            profile = SatsUserProfile.objects.update_or_create(magic_string=hex_data,defaults={'first_name': first_name,'last_name':last_name},)
             print(tk)
-            print(p)
+            print(profile)
         except IntegrityError as e:
             print(e)
         
@@ -75,7 +76,8 @@ class AuthView(APIView):
             "status": "OK",
             "magic_string": hex_data,
             "auth_url": auth_url,
-            "encoded": lnurl.encode(auth_url)
+            "encoded": lnurl.encode(auth_url),
+            "profile": profile
         }
 
         return JsonResponse(response)
