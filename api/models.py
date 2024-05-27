@@ -90,4 +90,4 @@ class SatsUserProfile(models.Model):
 class SatsUserProfileSerializer(serializers.ModelSerializer):
   class Meta:
     model = SatsUserProfile
-    fields = '__all__'
+    fields = ['magic_string', 'first_name', 'last_name']
