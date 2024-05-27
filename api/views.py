@@ -77,7 +77,7 @@ class AuthView(APIView):
             "magic_string": hex_data,
             "auth_url": auth_url,
             "encoded": lnurl.encode(auth_url),
-            "profile": SatsUserProfileSerializer(profile).data
+            "profile": SatsUserProfileSerializer(profile[0]).data
         }
 
         return JsonResponse(response)
