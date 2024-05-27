@@ -1,7 +1,6 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import AbstractUser,BaseUserManager
-from django.core.exceptions import ValidationError
 
 # Create your models here.
 
@@ -29,7 +28,6 @@ class CustomUserManager(BaseUserManager):
         user.is_superuser = True
         user.save()
         return user
-
 
 class User(AbstractUser):
 	magic_string = models.TextField(unique=True)

@@ -1,7 +1,5 @@
 from django.db import models
-from api.models import SatsUser, User
-from datetime import datetime
-# Create your models here.
+from api.models import SatsUser # Create your models here.
 
 class Event(models.Model):
 	EVENT_TYPE_CHOICES = (
@@ -24,10 +22,8 @@ class EventSession(models.Model):
 	def __str__(self):
 		return f"ID: {self.pk} - Name: {self.title}"
 
-
 class Attendance(models.Model):
 	user = models.ForeignKey(SatsUser,on_delete=models.CASCADE)
 	event = models.ForeignKey(EventSession, on_delete=models.CASCADE)
 	is_activated = models.BooleanField(default=False)
 	clock_in_time = models.DateTimeField(auto_now_add=True)
-
