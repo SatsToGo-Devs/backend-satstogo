@@ -1,4 +1,8 @@
+import pytz
+import datetime
+
 from django.db import models
+from django.utils.timezone import now
 from api.models import SatsUser # Create your models here.
 
 class Event(models.Model):
@@ -6,13 +10,25 @@ class Event(models.Model):
 		('One off', 'One off'),
 		('Recurring', 'Recurring'),
 	)
+
+	TIMEZONE_CHOICES = [(tz, tz) for tz in pytz.all_timezones]
+	
+
 	name = models.TextField()
 	deadline = models.DateTimeField()
 	event_type = models.TextField(max_length=15,choices=EVENT_TYPE_CHOICES)
 	venue = models.TextField()
 	reward = models.IntegerField()
+	timezone = models.CharField(max_length=50, choices=TIMEZONE_CHOICES)
+	created_at = models.DateTimeField(auto_now_add=True)
+
 	def __str__(self):
 		return self.name
+
+	def save(self, *args, **kwargs):
+			super(Event, self).save(*args, **kwargs)
+
+
 
 class EventSession(models.Model):
 	title = models.TextField()

@@ -3,6 +3,7 @@ from django.conf import settings
 
 # Create your views here.
 from rest_framework.response import Response
+from rest_framework.parsers import JSONParser
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -19,17 +20,18 @@ LNURL_PAYMENTS_ENDPOINT = settings.LNURL_PAYMENTS_ENDPOINT
 
 class EventCrud(APIView):
     serializer_class = EventSerializer
+    parser_classes = [JSONParser]
 
-    def create(self, request):
-        # Override create to handle attendee data (assuming data format)
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response({
-            "message":"Event created successfully!",
-            "data": serializer.data
-        })
+    def post(self, request):
+        serializer = EventSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                "message": "Event created successfully!",
+                "data": serializer.data
+            }, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self,request):
         events = Event.objects.prefetch_related('eventsession_set')

@@ -1,5 +1,7 @@
 from sattogo.middleware import BaseSerializer
 from .models import Event,EventSession
+import pytz
+
 
 from rest_framework import serializers
 
@@ -42,11 +44,23 @@ class EventReadSerializer(serializers.ModelSerializer):
         fields = ('name', 'deadline', 'event_type', 'venue', 'reward', 'sessions')
 
 
-class EventSerializer(BaseSerializer):
+class EventSerializer(serializers.ModelSerializer):
+    new_created_at = serializers.SerializerMethodField()
+    event_deadline = serializers.SerializerMethodField()
     class Meta:
         model = Event
         fields = '__all__'
         validators = [
             BaseSerializer.validate_required
         ]
+        extra_fields = ['new_created_at', 'event_deadline']
 
+    def get_new_created_at(self, obj):
+        timezone_selected = pytz.timezone(obj.timezone)
+        created_at_local = obj.created_at.astimezone(timezone_selected)
+        return created_at_local.strftime('%m/%d/%Y %H:%M')
+
+    def get_event_deadline(self, obj):
+        timezone_selected = pytz.timezone(obj.timezone)
+        deadline_local = obj.deadline.astimezone(timezone_selected)
+        return deadline_local.strftime('%m/%d/%Y %H:%M')
