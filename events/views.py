@@ -145,19 +145,33 @@ class RegisterUser(APIView):
 class RegisterUser(APIView):
     serializer_class = AttendanceSerializer
 
-    def create(self, request):
+    def post(self, request):
         # Override create to handle attendee data (assuming data format)
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
         return Response(
             data={
-                "message":"Event created successfully!",
+                "message":"User has registered for event successfully!",
                 "data": serializer.data
             },
             status=201
         )
+
+    def get(self,request):
+        try:
+            event_id = request.query_params.get('event_id')
+            event = Event.get_method(pk=event_id)
+            responsedict = event
+            status = 200
+        except(Event.DoesNotExist): 
+            responsedict = {'error': 'Event does not exist'}
+            status = 404
+        except Exception:
+            responsedict = {'error': 'An unexpected error occured'}
+            status = 500
+        return Response(data=responsedict,status=status)
 
 class RewardView(APIView):
     def generate_lnurl(self, request):

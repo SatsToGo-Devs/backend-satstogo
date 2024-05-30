@@ -29,7 +29,7 @@ class Event(models.Model):
 	access = models.CharField(max_length=30, choices=EVENT_ACCESS_CHOICES)
 
 	def __str__(self):
-		return self.name
+		return f"ID: {self.pk} : {self.name}"
 
 	def save(self, *args, **kwargs):
 		self.created_at = datetime.datetime.today() 
@@ -37,6 +37,12 @@ class Event(models.Model):
 		super(Event, self).save(*args, **kwargs)
 
 
+	@classmethod
+	def get_method(cls,**kwargs):
+		return cls.objects.prefetch_related(
+            models.Prefetch('eventsession_set', queryset=EventSession.objects.all()),  # Renamed eventsession_set to eventSessions
+            models.Prefetch('attendance_set', queryset=Attendance.objects.select_related('user'))  # Renamed attendance_set to attendance
+        ).get(**kwargs)
 
 class EventSession(models.Model):
 	title = models.TextField()
@@ -54,10 +60,9 @@ class EventSession(models.Model):
 
 	@classmethod
 	def get_method(cls,**kwargs):
-		return cls.objects.filter(**kwargs).prefetch_related(
-            models.Prefetch('eventSessions', queryset=EventSession.objects.all()),  # Renamed eventsession_set to eventSessions
-            models.Prefetch('attendance', queryset=Attendance.objects.select_related('user'))  # Renamed attendance_set to attendance
-        )
+		return cls.objects.select_related('parent_event').prefetch_related(
+            models.Prefetch('attendance_set', queryset=Attendance.objects.select_related('user'))  # Renamed attendance_set to attendance
+        ).get(**kwargs)
 
 	@classmethod
 	def get_method(cls,**kwargs):
