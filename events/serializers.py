@@ -38,8 +38,8 @@ class ConfirmEventSerialiazer(serializers.Serializer):
         matching_event_session = EventSession.objects.select_related('parent_event').prefetch_related('attendance_set').get(pk=pk)
         parent_event = matching_event_session.parent_event
 
-
-        if parent_event.is_public != True:
+        print('parent event',parent_event)
+        if parent_event.access != 'public':
             attendance  =  matching_event_session.attendance_set.all().get(magic_string=magic_string)
             if not attendance:
                 raise serializers.ValidationError(detail='You are not verified to attend this event',code=401)
