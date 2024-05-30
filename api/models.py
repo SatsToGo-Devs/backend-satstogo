@@ -43,7 +43,6 @@ class User(AbstractUser):
 
 	objects = CustomUserManager()
 
-
 	USERNAME_FIELD = 'magic_string'
 
 	def __str__(self):
