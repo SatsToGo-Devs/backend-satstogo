@@ -41,7 +41,7 @@ class EventSession(models.Model):
 	def get_method(cls,**kwargs):
 		return cls.objects.select_related('parent_event').prefetch_related(
             models.Prefetch('attendance_set', queryset=Attendance.objects.select_related('user'))  # Renamed attendance_set to attendance
-        ).get(**kwargs)
+        ).filter(**kwargs).first()
 
 class Attendance(models.Model):
 	first_name = models.TextField(default="")
@@ -52,3 +52,7 @@ class Attendance(models.Model):
 	eventSession = models.ForeignKey(EventSession, null=True, on_delete= models.CASCADE)
 	is_activated = models.BooleanField(default=False)
 	clock_in_time = models.DateTimeField(auto_now_add=True)
+
+	objects = models.Manager()
+
+

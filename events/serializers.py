@@ -40,8 +40,8 @@ class ConfirmEventSerialiazer(serializers.Serializer):
         parent_event = matching_event_session.parent_event
 
         if parent_event.access != 'public':
-            attendance  =  matching_event_session.attendance_set.all().get(user=magic_string)
-            print('attendance')
+            attendance  =  matching_event_session.attendance_set.all().get(user_magic_string=magic_string)
+            print('attendance',attendance)
             if not attendance:
                 raise serializers.ValidationError(detail='You are not on the list for this event',code=401)
         return data
@@ -76,3 +76,5 @@ class EventSerializer(BaseSerializer):
             BaseSerializer.validate_required
         ]
 
+
+    
