@@ -21,6 +21,7 @@ class Event(models.Model):
 
 	name = models.TextField()
 	event_type = models.TextField(max_length=15,choices=EVENT_TYPE_CHOICES)
+	access  = models.TextField(max_length=20,choices=EVENT_ACCESS_CHOICES,default='public')
 	venue = models.TextField()
 	reward = models.IntegerField()
 	timezone = models.CharField(max_length=50, choices=TIMEZONE_CHOICES)
@@ -58,11 +59,22 @@ class EventSession(models.Model):
             models.Prefetch('attendance', queryset=Attendance.objects.select_related('user'))  # Renamed attendance_set to attendance
         )
 
+	@classmethod
+	def get_method(cls,**kwargs):
+		return cls.objects.select_related('parent_event').prefetch_related(
+            models.Prefetch('attendance_set', queryset=Attendance.objects.select_related('user'))  # Renamed attendance_set to attendance
+        ).filter(**kwargs).first()
+
 class Attendance(models.Model):
 	first_name = models.TextField(default="")
 	last_name = models.TextField(default="")
 	employee_id = models.TextField(default="")
-	user = models.ForeignKey(SatsUser, on_delete=models.CASCADE)
-	eventSession = models.ForeignKey(EventSession, on_delete=models.CASCADE)
+	user = models.ForeignKey(SatsUser, null=True, on_delete=models.CASCADE)
+	event = models.ForeignKey(Event,null=True, on_delete=models.CASCADE)
+	eventSession = models.ForeignKey(EventSession, null=True, on_delete= models.CASCADE)
 	is_activated = models.BooleanField(default=False)
 	clock_in_time = models.DateTimeField(auto_now_add=True)
+
+	objects = models.Manager()
+
+
