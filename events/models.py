@@ -62,7 +62,7 @@ class EventSession(models.Model):
 	def get_method(cls,**kwargs):
 		return cls.objects.select_related('parent_event').prefetch_related(
             models.Prefetch('attendance_set', queryset=Attendance.objects.select_related('user'))  # Renamed attendance_set to attendance
-        ).get(**kwargs)
+        ).filter(**kwargs).first()
 
 	@classmethod
 	def get_method(cls,**kwargs):
@@ -80,6 +80,7 @@ class Attendance(models.Model):
 	is_activated = models.BooleanField(default=False)
 	clock_in_time = models.DateTimeField(auto_now_add=True)
 
+<<<<<<< HEAD
 	class Meta:
 		unique_together = ('user', 'event')
 
@@ -89,3 +90,8 @@ class Attendance(models.Model):
 
 	def __str__(self):
 		return f"ID: {self.pk} - Attendee: {self.first_name} {self.last_name}"
+=======
+	objects = models.Manager()
+
+
+>>>>>>> 8490c33 (feat: validation)

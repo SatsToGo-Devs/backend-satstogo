@@ -39,8 +39,13 @@ class ConfirmEventSerialiazer(serializers.Serializer):
         parent_event = matching_event_session.parent_event
 
         if parent_event.access != 'public':
+<<<<<<< HEAD
             attendance  =  matching_event_session.attendance_set.all().filter(user__magic_string=magic_string)
             # print('attendance',attendance)
+=======
+            attendance  =  matching_event_session.attendance_set.all().get(user_magic_string=magic_string)
+            print('attendance',attendance)
+>>>>>>> 8490c33 (feat: validation)
             if not attendance:
                 raise serializers.ValidationError(detail='You are not on the list for this event',code=401)
 
@@ -79,6 +84,7 @@ class EventSerializer(serializers.ModelSerializer):
         ]
         extra_fields = ['new_created_at', 'event_deadline']
 
+<<<<<<< HEAD
     def get_new_created_at(self, obj):
         timezone_selected = pytz.timezone(obj.timezone)
         created_at_local = obj.created_at.astimezone(timezone_selected)
@@ -88,3 +94,7 @@ class EventSerializer(serializers.ModelSerializer):
         timezone_selected = pytz.timezone(obj.timezone)
         deadline_local = obj.deadline.astimezone(timezone_selected)
         return deadline_local.strftime('%m/%d/%Y %H:%M')
+=======
+
+    
+>>>>>>> 8490c33 (feat: validation)
