@@ -6,11 +6,10 @@ from rest_framework.response import Response
 from rest_framework.parsers import JSONParser
 from rest_framework.views import APIView
 from rest_framework import status
-from rest_framework.decorators import api_view
 from datetime import datetime
 from .models import Event, Attendance,EventSession
 from api.models import SatsUser
-from .serializers import EventSerializer, EventReadSerializer, ConfirmEventSerialiazer
+from .serializers import EventSerializer, EventReadSerializer, ConfirmEventSerialiazer, AttendanceSerializer
 
 
 ADMIN_API_KEY = settings.ADMIN_API_KEY
@@ -92,6 +91,23 @@ class ActivateUser(APIView):
 
         return Response(responsedict,status=status)
 
+class RegisterUser(APIView):
+    serializer_class = AttendanceSerializer
+
+    def create(self, request):
+        # Override create to handle attendee data (assuming data format)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            data={
+                "message":"Event created successfully!",
+                "data": serializer.data
+            },
+            status=201
+        )
+
 class RewardView(APIView):
     def generate_lnurl(self, request):
         title = request.GET.get("title")
@@ -128,7 +144,7 @@ class RewardView(APIView):
     def get(self, request):
         # Call the generate_lnurl method
         return self.generate_lnurl(request)
-    
+
 class WithdrawCallbackView(APIView):
     def get(self, request):
         # Extract k1 token and Lightning invoice from query parameters
@@ -153,6 +169,7 @@ class WithdrawCallbackView(APIView):
         payment_headers = {"Content-type": "application/json", "X-Api-Key": ADMIN_API_KEY}
         payment_response = requests.post(LNURL_PAYMENTS_ENDPOINT, json=pay_invoice, headers=payment_headers)
         return Response(payment_response.json())
+
 
 
 
