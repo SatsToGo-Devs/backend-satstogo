@@ -26,6 +26,9 @@ class Event(models.Model):
 		return self.name
 
 	def save(self, *args, **kwargs):
+			self.created_at = datetime.datetime.today() 
+			self.created_at = self.created_at.astimezone(pytz.timezone(self.timezone)) 
+			self.deadline = self.deadline.astimezone(pytz.timezone(self.timezone))
 			super(Event, self).save(*args, **kwargs)
 
 
