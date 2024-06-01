@@ -10,9 +10,14 @@ class Event(models.Model):
 		('One off', 'One off'),
 		('Recurring', 'Recurring'),
 	)
+	
+	EVENT_ACCESS_CHOICES = (
+		('Public', 'public'),
+		('On-Register', 'on_register'),
+		('Restricted', 'restricted')
+	)
 
 	TIMEZONE_CHOICES = [(tz, tz) for tz in pytz.all_timezones]
-	
 
 	EVENT_ACCESS_CHOICES = (
 		('Public','public'),
@@ -26,16 +31,15 @@ class Event(models.Model):
 	reward = models.IntegerField()
 	timezone = models.CharField(max_length=50, choices=TIMEZONE_CHOICES)
 	created_at = models.DateTimeField(auto_now_add=True)
-	
+	access = models.CharField(max_length=30, choices=EVENT_ACCESS_CHOICES)
 
 	def __str__(self):
 		return f"ID: {self.pk} : {self.name}"
 
 	def save(self, *args, **kwargs):
-			self.created_at = datetime.datetime.today() 
-			self.created_at = self.created_at.astimezone(pytz.timezone(self.timezone)) 
-			self.deadline = self.deadline.astimezone(pytz.timezone(self.timezone))
-			super(Event, self).save(*args, **kwargs)
+		self.created_at = datetime.datetime.today() 
+		self.created_at = self.created_at.astimezone(pytz.timezone(self.timezone)) 
+		super(Event, self).save(*args, **kwargs)
 
 
 
@@ -54,6 +58,26 @@ class EventSession(models.Model):
 	deadline = models.DateTimeField()
 	def __str__(self):
 		return f"ID: {self.pk} - Name: {self.title}"
+	
+	def save(self, *args, **kwargs):
+		parent_timezone = self.parent_event.timezone
+		self.deadline = self.deadline.astimezone(pytz.timezone(parent_timezone))
+		super(EventSession, self).save(*args, **kwargs)
+		
+
+
+	@classmethod
+	def get_method(cls,**kwargs):
+		return cls.objects.filter(**kwargs).prefetch_related(
+            models.Prefetch('eventSessions', queryset=EventSession.objects.all()),  # Renamed eventsession_set to eventSessions
+            models.Prefetch('attendance', queryset=Attendance.objects.select_related('user'))  # Renamed attendance_set to attendance
+        )
+
+	@classmethod
+	def get_method(cls,**kwargs):
+		return cls.objects.select_related('parent_event').prefetch_related(
+            models.Prefetch('attendance_set', queryset=Attendance.objects.select_related('user'))  # Renamed attendance_set to attendance
+        ).filter(**kwargs).first()
 
 	@classmethod
 	def get_method(cls,**kwargs):
@@ -70,3 +94,13 @@ class Attendance(models.Model):
 	eventSession = models.ForeignKey(EventSession, null=True, on_delete= models.CASCADE)
 	is_activated = models.BooleanField(default=False)
 	clock_in_time = models.DateTimeField(auto_now_add=True)
+
+	class Meta:
+		unique_together = ('user', 'event')
+
+	def get_by_magic_string(self, magic_string):
+		return self.objects.filter(user__magic_string=magic_string).first()  # Get single object
+
+
+	def __str__(self):
+		return f"ID: {self.pk} - Attendee: {self.first_name} {self.last_name}"

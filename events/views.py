@@ -89,8 +89,19 @@ class ActivateUser(APIView):
                     responsedict = {'error': 'Oops, you are not eligible to receive this reward'}
                     status = 403
                     is_activated = False
-                Attendance(user=magic_string,event=session,is_activated=is_activated).save()
-                print(responsedict)
+
+
+
+                new_attendance = Attendance.objects.update_or_create(
+                    user__magic_string=magic_string,
+                    defaults={
+                        "event": parent_event,
+                        "eventSession": session,
+                        "is_activated":is_activated                    
+                    }
+                )
+
+
             except (SatsUser.DoesNotExist, EventSession.DoesNotExist):
                 responsedict = {'error': 'User or Event does not exist'}
                 status = 404
@@ -130,6 +141,23 @@ class RegisterUser(APIView):
             responsedict = {'error': 'An unexpected error occured'}
             status = 500
         return Response(data=responsedict,status=status)
+
+class RegisterUser(APIView):
+    serializer_class = AttendanceSerializer
+
+    def create(self, request):
+        # Override create to handle attendee data (assuming data format)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            data={
+                "message":"Event created successfully!",
+                "data": serializer.data
+            },
+            status=201
+        )
 
 class RewardView(APIView):
     def generate_lnurl(self, request):

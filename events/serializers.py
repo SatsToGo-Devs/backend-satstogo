@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+from sattogo.middleware import BaseSerializer
+from .models import Event,EventSession, Attendance
+>>>>>>> privatise-events
 import pytz
 from sattogo.middleware import BaseSerializer
 from .models import Event, EventSession, Attendance
@@ -30,27 +35,25 @@ class ConfirmEventSerialiazer(serializers.Serializer):
                 'detail': f"Missing required fields: {', '.join(missing_fields)}"
             })
 
-        return data
-
     def user_is_allowed(self,data):
         magic_string = data.get('magic_string')
 
         pk = data.get('pk')
-        print('pk',pk)
         matching_event_session = EventSession.get_method(pk=pk)
         parent_event = matching_event_session.parent_event
 
         if parent_event.access != 'public':
-            attendance  =  matching_event_session.attendance_set.all().get(user=magic_string)
-            print('attendance')
+            attendance  =  matching_event_session.attendance_set.all().filter(user__magic_string=magic_string)
+            # print('attendance',attendance)
             if not attendance:
                 raise serializers.ValidationError(detail='You are not on the list for this event',code=401)
-        return data
 
     def validate(self, data):
         self.missing_fields(data)
 
         self.user_is_allowed(data)
+        
+        return data
         
     class Meta:
         model = EventSession
