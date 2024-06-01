@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-=======
-from sattogo.middleware import BaseSerializer
-from .models import Event,EventSession, Attendance
->>>>>>> privatise-events
 import pytz
 from sattogo.middleware import BaseSerializer
 from .models import Event, EventSession, Attendance
