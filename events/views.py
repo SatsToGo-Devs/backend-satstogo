@@ -89,8 +89,19 @@ class ActivateUser(APIView):
                     responsedict = {'error': 'Oops, you are not eligible to receive this reward'}
                     status = 403
                     is_activated = False
-                Attendance(user=magic_string,event=session,is_activated=is_activated).save()
-                print(responsedict)
+
+
+
+                new_attendance = Attendance.objects.update_or_create(
+                    user__magic_string=magic_string,
+                    defaults={
+                        "event": parent_event,
+                        "eventSession": session,
+                        "is_activated":is_activated                    
+                    }
+                )
+
+
             except (SatsUser.DoesNotExist, EventSession.DoesNotExist):
                 responsedict = {'error': 'User or Event does not exist'}
                 status = 404

@@ -75,6 +75,12 @@ class Attendance(models.Model):
 	is_activated = models.BooleanField(default=False)
 	clock_in_time = models.DateTimeField(auto_now_add=True)
 
-	objects = models.Manager()
+	class Meta:
+		unique_together = ('user', 'event')
+
+	def get_by_magic_string(self, magic_string):
+		return self.objects.filter(user__magic_string=magic_string).first()  # Get single object
 
 
+	def __str__(self):
+		return f"ID: {self.pk} - Attendee: {self.first_name} {self.last_name}"
