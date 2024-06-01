@@ -4,6 +4,7 @@ attrs==23.2.0
 autobahn==23.6.2
 Automat==22.10.0
 bech32==1.2.0
+Brotli==1.1.0
 CacheControl==0.14.0
 cachetools==5.3.3
 certifi==2024.2.2
@@ -72,4 +73,5 @@ urllib3==2.2.1
 utils==1.0.2
 uvicorn==0.29.0
 websockets==12.0
+whitenoise==6.6.0
 zope.interface==6.3
