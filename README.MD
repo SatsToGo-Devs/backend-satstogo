@@ -9,10 +9,18 @@ pip install -r requirements.txt
 To run the project, use the command:
 
 ```
-python manage.py runserver
+python3 manage.py runserver
+```
+
+To run database migrations:
+
+```
+python3 manage.py makemigrations
+python3 manage.py migrate
 ```
 
 ## Authentication APIs
+
 The following flow is expected for the authentication APIs:
 
 1. To Login a user, perform a GET request to the endpoint `api/auth-login/` with the param `k1`. A successful login reluts in the response: `{"status": "OK"}` while the opposite results: `{"status": "ERROR", "message": "Magic String Not Found"}`
@@ -48,3 +56,6 @@ chatSocket.onclose = function(e) {
 
 ## RESOURCES
 - https://github.com/lnurl/luds?tab=readme-ov-file#lnurl-documents
+
+
+
