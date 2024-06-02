@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from binascii import unhexlify
 from api.utils.Utils import Utils
 from secp256k1 import PublicKey
-from .models import FcmToken, SatsUser,SatsUser, SatsUserProfile, SatsUserProfileSerializer
+from .models import FcmToken, SatsUser,SatsUser, SatsUserProfileSerializer
 import os
 import random
 import string
@@ -46,8 +46,6 @@ class AuthView(APIView):
             r = pubkey.ecdsa_verify(unhexlify(magic_str), sig_raw, raw=True)
             if(r == True):
                 user.update_last_login()
-                profile = SatsUserProfile.objects.get(magic_string=magic_str)
-                print(profile)
                 return JsonResponse({"status": "OK","data": SatsUserProfileSerializer(profile).data})
             else:
                 return JsonResponse({"status": "ERROR", "message": "Unable to Verify Magic String"})
@@ -66,12 +64,7 @@ class AuthView(APIView):
         try:
             data = json.loads(request.body)
             firebase_token = data.get('firebase_token')
-            first_name = data.get('first_name')
-            last_name = data.get('last_name')
             tk = FcmToken.objects.update_or_create(magic_string=hex_data, token=firebase_token,defaults={'magic_string': hex_data,'token':firebase_token},)
-            profile = SatsUserProfile.objects.update_or_create(magic_string=hex_data,defaults={'first_name': first_name,'last_name':last_name},)
-            print(tk)
-            print(profile)
         except IntegrityError as e:
             print(e)
         
@@ -86,7 +79,6 @@ class AuthView(APIView):
             "magic_string": hex_data,
             "auth_url": auth_url,
             "encoded": lnurl.encode(auth_url),
-            "profile": SatsUserProfileSerializer(profile[0]).data
         }
 
         return JsonResponse(response)
