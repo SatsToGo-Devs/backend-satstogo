@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from binascii import unhexlify
 from api.utils.Utils import Utils
 from secp256k1 import PublicKey
-from .models import FcmToken, SatsUser,SatsUser, SatsUserProfileSerializer
+from .models import FcmToken, SatsUser,SatsUser
 import os
 import random
 import string
@@ -46,7 +46,7 @@ class AuthView(APIView):
             r = pubkey.ecdsa_verify(unhexlify(magic_str), sig_raw, raw=True)
             if(r == True):
                 user.update_last_login()
-                return JsonResponse({"status": "OK","data": SatsUserProfileSerializer(profile).data})
+                return JsonResponse({"status": "OK"})
             else:
                 return JsonResponse({"status": "ERROR", "message": "Unable to Verify Magic String"})
         except SatsUser.DoesNotExist:
