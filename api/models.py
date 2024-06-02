@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import AbstractUser,BaseUserManager
+from django.core.exceptions import ValidationError
+from rest_framework import serializers
 
 # Create your models here.
 
@@ -81,3 +83,9 @@ class SatsUserProfile(models.Model):
 
 	def __str__(self):
 		return f"magic_string: {self.magic_string},first_name: {self.first_name},last_name: {self.last_name}"
+
+
+class SatsUserProfileSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = SatsUserProfile
+    fields = ['magic_string', 'first_name', 'last_name']
