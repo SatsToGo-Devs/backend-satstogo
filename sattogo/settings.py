@@ -27,6 +27,7 @@ LNURL_ENDPOINT = os.environ.get('LNURL_ENDPOINT')
 ADMIN_API_KEY = os.environ.get('ADMIN_API_KEY')
 INVOICE_READ_KEY = os.environ.get('INVOICE_READ_KEY')
 LNURL_PAYMENTS_ENDPOINT = os.environ.get("LNURL_PAYMENTS_ENDPOINT")
+DB_CONNECTION_STRING = os.environ.get('DB_CONNECTION_STRING')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -111,7 +112,7 @@ CHANNEL_LAYERS = {
 DATABASES = {
     'default': dj_database_url.config(
         # Replace this value with your local database's connection string.
-        default='postgresql://postgres:dedan@localhost:5432/sats',
+        default=DB_CONNECTION_STRING,
         conn_max_age=600
     )
 }

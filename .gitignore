@@ -3,3 +3,5 @@ sats/
 media/
 venv/
 __pycache__/
+
+.env

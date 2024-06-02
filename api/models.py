@@ -31,7 +31,6 @@ class CustomUserManager(BaseUserManager):
         user.save()
         return user
 
-
 class User(AbstractUser):
 	magic_string = models.TextField(unique=True)
 	key = models.TextField()
@@ -45,7 +44,6 @@ class User(AbstractUser):
 	REQUIRED_FIELDS = ['username']
 
 	objects = CustomUserManager()
-
 
 	USERNAME_FIELD = 'magic_string'
 
