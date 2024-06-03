@@ -72,4 +72,5 @@ urllib3==2.2.1
 utils==1.0.2
 uvicorn==0.29.0
 websockets==12.0
+whitenoise==6.6.0
 zope.interface==6.3
