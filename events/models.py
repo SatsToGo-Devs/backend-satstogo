@@ -64,18 +64,6 @@ class EventSession(models.Model):
             models.Prefetch('attendance_set', queryset=Attendance.objects.select_related('user'))  # Renamed attendance_set to attendance
         ).filter(**kwargs).first()
 
-	@classmethod
-	def get_method(cls,**kwargs):
-		return cls.objects.select_related('parent_event').prefetch_related(
-            models.Prefetch('attendance_set', queryset=Attendance.objects.select_related('user'))  # Renamed attendance_set to attendance
-        ).filter(**kwargs).first()
-
-	@classmethod
-	def get_method(cls,**kwargs):
-		return cls.objects.filter(**kwargs).prefetch_related(
-            models.Prefetch('eventSessions', queryset=EventSession.objects.all()),  # Renamed eventsession_set to eventSessions
-            models.Prefetch('attendance', queryset=Attendance.objects.select_related('user'))  # Renamed attendance_set to attendance
-        )
 
 class Attendance(models.Model):
 	first_name = models.TextField(default="")
