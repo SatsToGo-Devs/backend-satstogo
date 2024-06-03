@@ -84,7 +84,6 @@ class EventSerializer(serializers.ModelSerializer):
         ]
         extra_fields = ['new_created_at', 'event_deadline']
 
-<<<<<<< HEAD
     def get_new_created_at(self, obj):
         timezone_selected = pytz.timezone(obj.timezone)
         created_at_local = obj.created_at.astimezone(timezone_selected)
@@ -94,7 +93,3 @@ class EventSerializer(serializers.ModelSerializer):
         timezone_selected = pytz.timezone(obj.timezone)
         deadline_local = obj.deadline.astimezone(timezone_selected)
         return deadline_local.strftime('%m/%d/%Y %H:%M')
-=======
-
-    
->>>>>>> 8490c33 (feat: validation)
