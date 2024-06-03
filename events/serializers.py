@@ -13,13 +13,14 @@ class ConfirmEventSerialiazer(serializers.Serializer):
     pk = serializers.CharField(max_length=100)
     magic_string = serializers.CharField(max_length=300)
 
-    def validate(self, data):
-        """
-        Custom validation to ensure both 'pk' and 'magic_string' are present.
 
-        Raises a ValidationError if either field is missing.
+    def missing_fields(self, data):
         """
+            Custom validation to ensure both 'pk' and 'magic_string' are present.
 
+            Raises a ValidationError if either field is missing.
+        """
+        
         required_fields = ['pk', 'magic_string']
         missing_fields = [field for field in required_fields if field not in data]
 
@@ -28,23 +29,26 @@ class ConfirmEventSerialiazer(serializers.Serializer):
                 'detail': f"Missing required fields: {', '.join(missing_fields)}"
             })
 
-        return data
-
     def user_is_allowed(self,data):
-        magic_string = self.context.get('magic_string')
-        pk = self.context.get('pk')
-        matching_event_session = EventSession.objects.select_related('parent_event').prefetch_related('attendance_set').get(pk=pk)
+        magic_string = data.get('magic_string')
+
+        pk = data.get('pk')
+        matching_event_session = EventSession.get_method(pk=pk)
         parent_event = matching_event_session.parent_event
 
-        if parent_event.is_public != True:
-            raise serializers.ValidationError(detail='You are not verified to attend this event',code=401)
-        
-        attendance  =  matching_event_session.attendance_set.all().get(magic_string=magic_string)
-        if attendance:
-            raise serializers.ValidationError(detail='You are alreafy registered for this event!',code=401)
+        if parent_event.access != 'public':
+            attendance  =  matching_event_session.attendance_set.all().filter(user__magic_string=magic_string)
+            # print('attendance',attendance)
+            if not attendance:
+                raise serializers.ValidationError(detail='You are not on the list for this event',code=401)
+
+    def validate(self, data):
+        self.missing_fields(data)
+
+        self.user_is_allowed(data)
         
         return data
-
+        
     class Meta:
         model = EventSession
         fields = ['pk','magic_string']  # Specify desired fields
