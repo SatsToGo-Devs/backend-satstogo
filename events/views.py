@@ -173,6 +173,23 @@ class RegisterUser(APIView):
             status = 500
         return Response(data=responsedict,status=status)
 
+class RegisterUser(APIView):
+    serializer_class = AttendanceSerializer
+
+    def create(self, request):
+        # Override create to handle attendee data (assuming data format)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            data={
+                "message":"Event created successfully!",
+                "data": serializer.data
+            },
+            status=201
+        )
+
 class RewardView(APIView):
     def generate_lnurl(self, request):
         title = request.GET.get("title")

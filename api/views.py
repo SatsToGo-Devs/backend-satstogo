@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from binascii import unhexlify
 from api.utils.Utils import Utils
 from secp256k1 import PublicKey
-from .models import FcmToken, SatsUser,SatsUser, SatsUserProfile
+from .models import FcmToken, SatsUser,SatsUser, SatsUserProfile, SatsUserProfileSerializer
 import os
 import random
 import string
@@ -13,7 +13,9 @@ import random
 import api.consumers as consumers
 from rest_framework.views import APIView
 from django.conf import settings
-from asgiref.sync import sync_to_async
+from rest_framework.response import Response
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 from django.views.decorators.csrf import csrf_exempt
 from django.db import IntegrityError
 
@@ -21,6 +23,17 @@ ADMIN_API_KEY = settings.ADMIN_API_KEY
 LNURL_ENDPOINT = settings.LNURL_ENDPOINT
 INVOICE_READ_KEY = settings.INVOICE_READ_KEY
 LNURL_PAYMENTS_ENDPOINT = settings.LNURL_PAYMENTS_ENDPOINT
+
+def trigger_payment_success_event(invoice):
+    channel_layer = get_channel_layer()
+    import pdb; pdb.set_trace()
+    async_to_sync(channel_layer.group_send)(
+        'invoice_updates',
+        {
+            'type': 'send_invoice_update',
+            'message': f'Payment successful for invoice: {invoice}'
+        }
+    )
 
 class AuthView(APIView):
     @csrf_exempt
@@ -33,8 +46,9 @@ class AuthView(APIView):
             r = pubkey.ecdsa_verify(unhexlify(magic_str), sig_raw, raw=True)
             if(r == True):
                 user.update_last_login()
-                print(user)
-                return JsonResponse({"status": "OK"})
+                profile = SatsUserProfile.objects.get(magic_string=magic_str)
+                print(profile)
+                return JsonResponse({"status": "OK","data": SatsUserProfileSerializer(profile).data})
             else:
                 return JsonResponse({"status": "ERROR", "message": "Unable to Verify Magic String"})
         except SatsUser.DoesNotExist:
@@ -55,9 +69,9 @@ class AuthView(APIView):
             first_name = data.get('first_name')
             last_name = data.get('last_name')
             tk = FcmToken.objects.update_or_create(magic_string=hex_data, token=firebase_token,defaults={'magic_string': hex_data,'token':firebase_token},)
-            p = SatsUserProfile.objects.update_or_create(magic_string=hex_data,defaults={'first_name': first_name,'last_name':last_name},)
+            profile = SatsUserProfile.objects.update_or_create(magic_string=hex_data,defaults={'first_name': first_name,'last_name':last_name},)
             print(tk)
-            print(p)
+            print(profile)
         except IntegrityError as e:
             print(e)
         
@@ -71,7 +85,8 @@ class AuthView(APIView):
             "status": "OK",
             "magic_string": hex_data,
             "auth_url": auth_url,
-            "encoded": lnurl.encode(auth_url)
+            "encoded": lnurl.encode(auth_url),
+            "profile": SatsUserProfileSerializer(profile[0]).data
         }
 
         return JsonResponse(response)
@@ -101,3 +116,81 @@ class AuthView(APIView):
         letters = string.ascii_lowercase
         return ''.join(random.choice(letters) for _ in range(length))
 
+      
+class RewardView(APIView):
+    def generate_lnurl(self, request):
+        title = request.GET.get("title")
+        min_withdrawable = request.GET.get("min_withdrawable")
+        max_withdrawable = request.GET.get("max_withdrawable")
+        uses = request.GET.get("uses")
+        wait_time = request.GET.get("wait_time")
+        is_unique = request.GET.get("is_unique")
+        webhook_url = request.GET.get("webhook_url")
+        admin_key = request.GET.get("X-Api-Key")
+        
+        payload = {
+            "title": title,
+            "min_withdrawable": int(min_withdrawable),
+            "max_withdrawable": int(max_withdrawable),
+            "is_unique": True,
+            "uses": 1, 
+            "wait_time": 1
+        }
+
+        lnurl_endpoint = LNURL_ENDPOINT
+
+        headers = {"Content-type": "application/json", "X-Api-Key": ADMIN_API_KEY}
+
+        # Making a POST request to the LNURL generation endpoint
+        response = requests.post(lnurl_endpoint, json=payload, headers=headers)
+
+        if response.status_code == status.HTTP_201_CREATED:
+            lnurl = response.json()
+            return Response({"lnurl": lnurl}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "Failed to generate LNURL"}, status=response.status_code)
+
+    def get(self, request):
+        # Call the generate_lnurl method
+        return self.generate_lnurl(request)
+    
+    
+async def send_invoice_update_message(self, invoice):
+    try:
+        await self.channel_layer.group_send(
+            "invoice_updates", {"type": "send_invoice_update", "message": f"Payment successful for invoice: {invoice}"}
+        )
+    except Exception as e:
+        print("Error sending WebSocket message:", e)
+
+class WithdrawCallbackView(APIView):
+    def get(self, request):
+        # Extract k1 token and Lightning invoice from query parameters
+        k1_token = request.GET.get('k1')
+        invoice = request.GET.get('invoice')
+
+        # create_invoice = {
+        #         "unit": "sat",
+        #         "internal": False,
+        #         "out": False,
+        #         "amount": 10,
+        #         "memo": "Payment memo", 
+        # }
+        # headers = {"Content-type": "application/json", "X-Api-Key": INVOICE_READ_KEY}
+        # response = requests.post(LNURL_PAYMENTS_ENDPOINT, json=create_invoice, headers=headers)
+    
+        # response_data = json.loads(response.content.decode('utf-8'))
+        # payment_request = response_data.get("payment_request")
+
+        pay_invoice = {
+            "out": True,
+            "bolt11": invoice,
+        }
+        payment_headers = {"Content-type": "application/json", "X-Api-Key": ADMIN_API_KEY}
+        payment_response = requests.post(LNURL_PAYMENTS_ENDPOINT, json=pay_invoice, headers=payment_headers)
+        if payment_response.status_code == 201:
+            try:
+                trigger_payment_success_event(invoice)
+            except Exception as e:
+                print("Error sending WebSocket message:", e)
+        return Response(payment_response.json())

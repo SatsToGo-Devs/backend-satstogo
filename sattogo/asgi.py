@@ -25,6 +25,7 @@ application = ProtocolTypeRouter({
         AuthMiddlewareStack(
             URLRouter([
             re_path(r"ws/notifications/(?P<k1>\w+)/$", consumers.WebSocketConsumer.as_asgi()),
+            re_path(r"ws/invoice/updates/", consumers.PaymentUpdateConsumer.as_asgi()),
         ]
         ),
         )

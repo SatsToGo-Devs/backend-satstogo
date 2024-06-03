@@ -1,8 +1,6 @@
 from sattogo.middleware import BaseSerializer
-from .models import Event,EventSession, Attendance
 import pytz
-
-
+from .models import Event, EventSession, Attendance
 from rest_framework import serializers
 
 class EventSessionReadSerializer(serializers.ModelSerializer):
