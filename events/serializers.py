@@ -1,6 +1,7 @@
 from sattogo.middleware import BaseSerializer
 import pytz
-from .models import Event, EventSession, Attendance, AttendanceBackup
+from .models import Event, EventSession, Attendance
+from api.models import SatsUser
 from rest_framework import serializers
 
 class EventSessionReadSerializer(serializers.ModelSerializer):
@@ -52,10 +53,21 @@ class ConfirmEventSerialiazer(serializers.Serializer):
         model = EventSession
         fields = ['pk','magic_string']  # Specify desired fields
 
+
 class AttendanceSerializer(serializers.ModelSerializer):
+    user = serializers.CharField()
+
+    # ... other fields
     class Meta:
-        model = AttendanceBackup
+        model = Attendance
         fields = ['first_name','last_name','user','event']
+
+    def create(self, validated_data):
+        user = validated_data.pop('user')
+        new_user = SatsUser.objects.get(magic_string=user)
+        print('new user',validated_data)
+        new_attendance = Attendance.objects.create(user=new_user, **validated_data)
+        return new_attendance
 
 
 class EventReadSerializer(serializers.ModelSerializer):
