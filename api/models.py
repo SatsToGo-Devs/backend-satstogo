@@ -76,17 +76,3 @@ class FcmToken(models.Model):
 
 	def __str__(self):
 		return f"magic_string: {self.magic_string},token: {self.token},created_at: {self.created_at}"
-
-class SatsUserProfile(models.Model):
-	magic_string = models.TextField(unique=True)
-	first_name = models.TextField()
-	last_name = models.TextField()
-
-	def __str__(self):
-		return f"magic_string: {self.magic_string},first_name: {self.first_name},last_name: {self.last_name}"
-
-
-class SatsUserProfileSerializer(serializers.ModelSerializer):
-  class Meta:
-    model = SatsUserProfile
-    fields = ['magic_string', 'first_name', 'last_name']

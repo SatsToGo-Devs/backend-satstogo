@@ -7,7 +7,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework.views import APIView
 from rest_framework import status
 from datetime import datetime
-from .models import Event, Attendance,EventSession
+from .models import Event, Attendance,EventSession,AttendanceBackup
 from api.models import SatsUser
 from .serializers import EventSerializer, EventReadSerializer, ConfirmEventSerialiazer, AttendanceSerializer
 
@@ -90,17 +90,15 @@ class ActivateUser(APIView):
                     status = 403
                     is_activated = False
 
-
-
-                new_attendance = Attendance.objects.update_or_create(
+                new_attendance = AttendanceBackup.objects.update_or_create(
                     user__magic_string=magic_string,
+                    event=parent_event,
                     defaults={
                         "event": parent_event,
                         "eventSession": session,
                         "is_activated":is_activated                    
                     }
                 )
-
 
             except (SatsUser.DoesNotExist, EventSession.DoesNotExist):
                 responsedict = {'error': 'User or Event does not exist'}
@@ -141,54 +139,6 @@ class RegisterUser(APIView):
             responsedict = {'error': 'An unexpected error occured'}
             status = 500
         return Response(data=responsedict,status=status)
-
-class RegisterUser(APIView):
-    serializer_class = AttendanceSerializer
-
-    def post(self, request):
-        # Override create to handle attendee data (assuming data format)
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(
-            data={
-                "message":"User has registered for event successfully!",
-                "data": serializer.data
-            },
-            status=201
-        )
-
-    def get(self,request):
-        try:
-            event_id = request.query_params.get('event_id')
-            event = Event.get_method(pk=event_id)
-            responsedict = event
-            status = 200
-        except(Event.DoesNotExist): 
-            responsedict = {'error': 'Event does not exist'}
-            status = 404
-        except Exception:
-            responsedict = {'error': 'An unexpected error occured'}
-            status = 500
-        return Response(data=responsedict,status=status)
-
-class RegisterUser(APIView):
-    serializer_class = AttendanceSerializer
-
-    def create(self, request):
-        # Override create to handle attendee data (assuming data format)
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(
-            data={
-                "message":"Event created successfully!",
-                "data": serializer.data
-            },
-            status=201
-        )
 
 class RewardView(APIView):
     def generate_lnurl(self, request):
