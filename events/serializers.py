@@ -64,7 +64,7 @@ class AttendanceSerializer(serializers.ModelSerializer):
         
         if existing_match:            
             raise serializers.ValidationError({
-                'detail': f"You have already registered for this event"
+                'error': f"You have already registered for this event"
             })
 
     def validate(self, data):

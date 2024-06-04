@@ -81,16 +81,3 @@ class Attendance(models.Model):
 
 	def __str__(self):
 		return f"ID: {self.pk} - Attendee: {self.first_name} {self.last_name}"
-
-class AttendanceBackup(models.Model):
-	first_name = models.TextField(default="")
-	last_name = models.TextField(default="")
-	employee_id = models.TextField(default="")
-	user = models.ForeignKey(SatsUser, null=True, on_delete=models.CASCADE)
-	event = models.ForeignKey(Event,null=True, on_delete=models.CASCADE)
-	eventSession = models.ForeignKey(EventSession, null=True, on_delete= models.CASCADE)
-	is_activated = models.BooleanField(default=False)
-	clock_in_time = models.DateTimeField(auto_now_add=True)
-
-	def __str__(self):
-		return f"ID: {self.pk} - Attendee: {self.first_name} {self.last_name}"

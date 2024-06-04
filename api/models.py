@@ -35,6 +35,8 @@ class User(AbstractUser):
 	magic_string = models.TextField(unique=True)
 	key = models.TextField()
 	sig = models.TextField()
+	first_name = models.TextField(default="")
+	last_name = models.TextField(default="")
 	created_at = models.DateTimeField(auto_now_add=True)
 	last_login = models.DateTimeField(auto_now_add=True)
 	is_staff = models.BooleanField(default=False)

@@ -65,6 +65,9 @@ class AuthView(APIView):
         try:
             data = json.loads(request.body)
             firebase_token = data.get('firebase_token')
+            first_name = data.get('first_name')
+            last_name = data.get('last_name')
+            user=SatsUser.objects.create(magic_string=hex_data,first_name=first_name,last_name=last_name)
             tk = FcmToken.objects.update_or_create(magic_string=hex_data, token=firebase_token,defaults={'magic_string': hex_data,'token':firebase_token},)
         except IntegrityError as e:
             print(e)
@@ -80,6 +83,7 @@ class AuthView(APIView):
             "magic_string": hex_data,
             "auth_url": auth_url,
             "encoded": lnurl.encode(auth_url),
+            "user":user
         }
 
         return JsonResponse(response)
@@ -94,8 +98,7 @@ class AuthView(APIView):
         r = pubkey.ecdsa_verify(unhexlify(k1), sig_raw, raw=True)
         if(r == True):
             try:
-                user=SatsUser(magic_string=k1,key=key,sig=sig)
-                await sync_to_async(user.save)()
+                SatsUser.objects.update_or_create(magic_string=k1,defaults={'key': key,'sig':sig},)
             except IntegrityError as e:
                 print(e)
                 
