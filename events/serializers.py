@@ -27,7 +27,7 @@ class ConfirmEventSerialiazer(serializers.Serializer):
 
         if missing_fields:
             raise serializers.ValidationError({
-                'detail': f"Missing required fields: {', '.join(missing_fields)}"
+                'error': f"Missing required fields: {', '.join(missing_fields)}"
             })
 
     def user_is_allowed(self,data):
