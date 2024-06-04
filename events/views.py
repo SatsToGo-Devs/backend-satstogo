@@ -7,7 +7,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework.views import APIView
 from rest_framework import status
 from datetime import datetime
-from .models import Event, Attendance,EventSession,AttendanceBackup
+from .models import Event, Attendance,EventSession
 from api.models import SatsUser
 from .serializers import EventSerializer, EventReadSerializer, ConfirmEventSerialiazer, AttendanceSerializer
 
@@ -90,7 +90,7 @@ class ActivateUser(APIView):
                     status = 403
                     is_activated = False
 
-                new_attendance = AttendanceBackup.objects.update_or_create(
+                new_attendance = Attendance.objects.update_or_create(
                     user__magic_string=magic_string,
                     event=parent_event,
                     defaults={

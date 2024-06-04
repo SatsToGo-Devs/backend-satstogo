@@ -64,24 +64,12 @@ class EventSession(models.Model):
             models.Prefetch('attendance_set', queryset=Attendance.objects.select_related('user'))  # Renamed attendance_set to attendance
         ).filter(**kwargs).first()
 
-	@classmethod
-	def get_method(cls,**kwargs):
-		return cls.objects.select_related('parent_event').prefetch_related(
-            models.Prefetch('attendance_set', queryset=Attendance.objects.select_related('user'))  # Renamed attendance_set to attendance
-        ).filter(**kwargs).first()
-
-	@classmethod
-	def get_method(cls,**kwargs):
-		return cls.objects.filter(**kwargs).prefetch_related(
-            models.Prefetch('eventSessions', queryset=EventSession.objects.all()),  # Renamed eventsession_set to eventSessions
-            models.Prefetch('attendance', queryset=Attendance.objects.select_related('user'))  # Renamed attendance_set to attendance
-        )
 
 class Attendance(models.Model):
 	first_name = models.TextField(default="")
 	last_name = models.TextField(default="")
 	employee_id = models.TextField(default="")
-	user = models.ForeignKey(SatsUser, null=True, on_delete=models.CASCADE,to_field="magic_string")
+	user = models.ForeignKey(SatsUser, null=True, on_delete=models.CASCADE)
 	event = models.ForeignKey(Event,null=True, on_delete=models.CASCADE)
 	eventSession = models.ForeignKey(EventSession, null=True, on_delete= models.CASCADE)
 	is_activated = models.BooleanField(default=False)
@@ -101,7 +89,7 @@ class AttendanceBackup(models.Model):
 	first_name = models.TextField(default="")
 	last_name = models.TextField(default="")
 	employee_id = models.TextField(default="")
-	user = models.ForeignKey(SatsUser, null=True, on_delete=models.CASCADE,to_field="magic_string")
+	user = models.ForeignKey(SatsUser, null=True, on_delete=models.CASCADE)
 	event = models.ForeignKey(Event,null=True, on_delete=models.CASCADE)
 	eventSession = models.ForeignKey(EventSession, null=True, on_delete= models.CASCADE)
 	is_activated = models.BooleanField(default=False)
