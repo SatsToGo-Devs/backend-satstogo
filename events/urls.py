@@ -4,7 +4,7 @@ from events.views import ActivateUser,EventCrud, RewardView, WithdrawCallbackVie
 
 urlpatterns = [
     # URLS for Events
-    path('register', RegisterUser.as_view(),name='activate-event'),
+    path('register', RegisterUser.as_view(),name='register-for-event'),
     path('activate', ActivateUser.as_view(),name='activate-event'),
     path('withdraw', RewardView.as_view()),  # This is the reward endpoint
     path('callback', WithdrawCallbackView.as_view()),
