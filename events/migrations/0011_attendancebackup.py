@@ -25,8 +25,5 @@ class Migration(migrations.Migration):
                 ('eventSession', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='events.eventsession')),
                 ('user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='api.satsuser', to_field='magic_string')),
             ],
-            options={
-                'unique_together': {('user', 'event')},
-            },
         ),
     ]
