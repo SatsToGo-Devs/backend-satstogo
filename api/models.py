@@ -56,8 +56,8 @@ class User(AbstractUser):
 
 class SatsUser(models.Model):
 	magic_string = models.TextField(unique=True)
-	first_name = models.TextField(default="")
-	last_name = models.TextField(default="")
+	first_name = models.TextField(default="",null=True,)
+	last_name = models.TextField(default="",null=True,)
 	key = models.TextField()
 	sig = models.TextField()
 	created_at = models.DateTimeField(auto_now_add=True)
