@@ -107,8 +107,5 @@ class AttendanceBackup(models.Model):
 	is_activated = models.BooleanField(default=False)
 	clock_in_time = models.DateTimeField(auto_now_add=True)
 
-	class Meta:
-		unique_together = ('user', 'event')
-
 	def __str__(self):
 		return f"ID: {self.pk} - Attendee: {self.first_name} {self.last_name}"
