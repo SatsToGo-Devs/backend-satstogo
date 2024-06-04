@@ -46,6 +46,9 @@ class AuthView(APIView):
             sig_raw = pubkey.ecdsa_deserialize(unhexlify(user.sig))
             r = pubkey.ecdsa_verify(unhexlify(magic_str), sig_raw, raw=True)
             if(r == True):
+                first_name = request.GET.get('first_name')
+                last_name = request.GET.get('last_name')
+                user.update_user_profile(last_name=last_name, first_name=first_name)
                 user.update_last_login()
                 return JsonResponse({"status": "OK"})
             else:

@@ -35,8 +35,6 @@ class User(AbstractUser):
 	magic_string = models.TextField(unique=True)
 	key = models.TextField()
 	sig = models.TextField()
-	first_name = models.TextField(default="")
-	last_name = models.TextField(default="")
 	created_at = models.DateTimeField(auto_now_add=True)
 	last_login = models.DateTimeField(auto_now_add=True)
 	is_staff = models.BooleanField(default=False)
@@ -58,6 +56,8 @@ class User(AbstractUser):
 
 class SatsUser(models.Model):
 	magic_string = models.TextField(unique=True)
+	first_name = models.TextField(default="")
+	last_name = models.TextField(default="")
 	key = models.TextField()
 	sig = models.TextField()
 	created_at = models.DateTimeField(auto_now_add=True)
@@ -65,11 +65,16 @@ class SatsUser(models.Model):
 
 
 	def __str__(self):
-		return f"pk:${self.pk} magic_string: {self.magic_string},key: {self.key},sig: {self.sig},created_at: {self.created_at}, last_login: {self.last_login}"
+		return f"pk:${self.pk} magic_string: {self.magic_string},key: {self.key}, sig: {self.sig}, first_name: {self.first_name}, last_name: {self.last_name}, created_at: {self.created_at}, last_login: {self.last_login}"
 
 	def update_last_login(self):
 		self.last_login = timezone.now()
 		self.save(update_fields=['last_login'])
+
+	def update_user_profile(self,first_name,last_name):
+		self.last_name = last_name
+		self.first_name = first_name
+		self.save(update_fields=['first_name','last_name'])
 
 class FcmToken(models.Model):
 	magic_string = models.TextField(unique=True)
