@@ -72,9 +72,10 @@ class SatsUser(models.Model):
 		self.save(update_fields=['last_login'])
 
 	def update_user_profile(self,first_name,last_name):
-		self.last_name = last_name
-		self.first_name = first_name
-		self.save(update_fields=['first_name','last_name'])
+		if not self.last_name:
+			self.last_name = last_name
+			self.first_name = first_name
+			self.save(update_fields=['first_name','last_name'])
 
 class FcmToken(models.Model):
 	magic_string = models.TextField(unique=True)
