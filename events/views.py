@@ -90,7 +90,7 @@ class ActivateUser(APIView):
                     status = 403
                     is_activated = False
 
-                new_attendance = Attendance.objects.update_or_create(
+                new_attendance = AttendanceBackup.objects.update_or_create(
                     user__magic_string=magic_string,
                     event=parent_event,
                     defaults={
