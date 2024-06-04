@@ -1,6 +1,6 @@
 from sattogo.middleware import BaseSerializer
 import pytz
-from .models import Event, EventSession, Attendance
+from .models import Event, EventSession, Attendance, AttendanceBackup
 from rest_framework import serializers
 
 class EventSessionReadSerializer(serializers.ModelSerializer):
@@ -40,10 +40,6 @@ class ConfirmEventSerialiazer(serializers.Serializer):
             # print('attendance',attendance)
             if not guest:
                 raise serializers.ValidationError(detail='You are not on the list for this event',code=401)
-
-        attendance  =  Attendance.objects.get(magic_string=magic_string,pk=pk)
-        if attendance:
-            raise serializers.ValidationError(detail='You are already activated for this event!',code=401)
         
     def validate(self, data):
         self.missing_fields(data)
@@ -58,7 +54,7 @@ class ConfirmEventSerialiazer(serializers.Serializer):
 
 class AttendanceSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Attendance
+        model = AttendanceBackup
         fields = ['first_name','last_name','user','event']
 
 
