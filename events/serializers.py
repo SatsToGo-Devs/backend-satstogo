@@ -2,7 +2,7 @@ from sattogo.middleware import BaseSerializer
 import pytz
 from .models import Event, EventSession, Attendance
 from api.models import SatsUser
-from rest_framework import serializers
+from rest_framework import serializers,validators
 
 class EventSessionReadSerializer(serializers.ModelSerializer):
     class Meta:
@@ -46,7 +46,6 @@ class ConfirmEventSerialiazer(serializers.Serializer):
         self.missing_fields(data)
 
         # self.user_is_allowed(data)
-        
         return data
         
     class Meta:
@@ -58,9 +57,30 @@ class AttendanceSerializer(serializers.ModelSerializer):
     user = serializers.CharField()
 
     # ... other fields
+    def is_unique(self,data):
+        magic_string = data.get('user')
+        event = data.get('event')
+        existing_match = Attendance.objects.filter(user__magic_string=magic_string, event=event).first()
+        
+        if existing_match:            
+            raise serializers.ValidationError({
+                'detail': f"You have already registered for this event"
+            })
+
+    def validate(self, data):
+        self.is_unique(data)
+        return data
+
     class Meta:
         model = Attendance
         fields = ['first_name','last_name','user','event']
+        validators = [
+            validators.UniqueTogetherValidator(
+                queryset=Attendance.objects.all(),
+                fields=["user", "event"],
+                message=('This user has already registered for this')
+            )
+        ]
 
     def create(self, validated_data):
         user = validated_data.pop('user')
