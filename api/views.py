@@ -2,6 +2,7 @@ import json
 import os
 from django.http import JsonResponse
 from binascii import unhexlify
+from api.serializers import SatsUserSerializer
 from api.utils.Utils import Utils
 from secp256k1 import PublicKey
 from .models import FcmToken, SatsUser,SatsUser
@@ -86,7 +87,7 @@ class AuthView(APIView):
             "magic_string": hex_data,
             "auth_url": auth_url,
             "encoded": lnurl.encode(auth_url),
-            "user":user
+            "user":SatsUserSerializer(user).data
         }
 
         return JsonResponse(response)
