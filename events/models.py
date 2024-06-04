@@ -81,14 +81,15 @@ class Attendance(models.Model):
 	first_name = models.TextField(default="")
 	last_name = models.TextField(default="")
 	employee_id = models.TextField(default="")
-	user = models.ForeignKey(SatsUser, null=True, on_delete=models.CASCADE)
+	magic_string = models.TextField(default="")
+	user = models.ForeignKey(SatsUser, null=True, on_delete=models.CASCADE,to_field="magic_string")
 	event = models.ForeignKey(Event,null=True, on_delete=models.CASCADE)
 	eventSession = models.ForeignKey(EventSession, null=True, on_delete= models.CASCADE)
 	is_activated = models.BooleanField(default=False)
 	clock_in_time = models.DateTimeField(auto_now_add=True)
 
 	class Meta:
-		unique_together = ('user', 'event')
+		unique_together = ('user', 'event', 'magic_string')
 
 	def get_by_magic_string(self, magic_string):
 		return self.objects.filter(user__magic_string=magic_string).first()  # Get single object
