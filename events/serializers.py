@@ -44,7 +44,7 @@ class ConfirmEventSerialiazer(serializers.Serializer):
     def validate(self, data):
         self.missing_fields(data)
 
-        self.user_is_allowed(data)
+        # self.user_is_allowed(data)
         
         return data
         
