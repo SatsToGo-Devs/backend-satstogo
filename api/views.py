@@ -104,7 +104,11 @@ class AuthView(APIView):
         r = pubkey.ecdsa_verify(unhexlify(k1), sig_raw, raw=True)
         if(r == True):
             try:
-                await sync_to_async(SatsUser.objects.update_or_create(magic_string=k1,defaults={'key': key,'sig':sig},))
+                update_or_create_task = sync_to_async(SatsUser.objects.update_or_create)
+                user, created = await update_or_create_task(
+                    magic_string=k1,
+                    defaults={'key': key, 'sig': sig},
+                )
             except IntegrityError as e:
                 print(e)
                 
