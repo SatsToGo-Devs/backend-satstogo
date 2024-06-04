@@ -43,6 +43,8 @@ class AuthView(APIView):
         try:
             magic_str = request.GET.get('k1')
             user = SatsUser.objects.get(magic_string=magic_str)
+            if not user.key:
+                return JsonResponse({"status": "ERROR", "message": "Unable to Verify Magic String"})
             pubkey = PublicKey(unhexlify(user.key), raw=True)
             sig_raw = pubkey.ecdsa_deserialize(unhexlify(user.sig))
             r = pubkey.ecdsa_verify(unhexlify(magic_str), sig_raw, raw=True)
