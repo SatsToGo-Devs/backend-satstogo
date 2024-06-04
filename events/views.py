@@ -92,6 +92,7 @@ class ActivateUser(APIView):
 
                 new_attendance = Attendance.objects.update_or_create(
                     user__magic_string=magic_string,
+                    event=parent_event,
                     defaults={
                         "event": parent_event,
                         "eventSession": session,

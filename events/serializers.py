@@ -31,17 +31,20 @@ class ConfirmEventSerialiazer(serializers.Serializer):
 
     def user_is_allowed(self,data):
         magic_string = data.get('magic_string')
-
         pk = data.get('pk')
         matching_event_session = EventSession.get_method(pk=pk)
         parent_event = matching_event_session.parent_event
 
         if parent_event.access != 'public':
-            attendance  =  matching_event_session.attendance_set.all().filter(user__magic_string=magic_string)
+            guest  =  matching_event_session.attendance_set.all().filter(user__magic_string=magic_string)
             # print('attendance',attendance)
-            if not attendance:
+            if not guest:
                 raise serializers.ValidationError(detail='You are not on the list for this event',code=401)
 
+        attendance  =  Attendance.objects.get(magic_string=magic_string,pk=pk)
+        if attendance:
+            raise serializers.ValidationError(detail='You are already activated for this event!',code=401)
+        
     def validate(self, data):
         self.missing_fields(data)
 
