@@ -28,6 +28,8 @@ ADMIN_API_KEY = os.environ.get('ADMIN_API_KEY')
 INVOICE_READ_KEY = os.environ.get('INVOICE_READ_KEY')
 LNURL_PAYMENTS_ENDPOINT = os.environ.get("LNURL_PAYMENTS_ENDPOINT")
 DB_CONNECTION_STRING = os.environ.get('DB_CONNECTION_STRING')
+BLINK_API_KEY = os.environ.get("BLINK_API_KEY")
+BLINK_API_URL = os.environ.get('BLINK_API_URL')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -54,6 +56,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'api',
     'events',
+    'wallet',
 ]
 
 MIDDLEWARE = [

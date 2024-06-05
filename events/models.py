@@ -3,7 +3,7 @@ import datetime
 
 from django.db import models
 from django.utils.timezone import now
-from api.models import SatsUser # Create your models here.
+from api.models import SatsUser
 
 class Event(models.Model):
 	EVENT_TYPE_CHOICES = (
@@ -63,7 +63,6 @@ class EventSession(models.Model):
 		return cls.objects.select_related('parent_event').prefetch_related(
             models.Prefetch('attendance_set', queryset=Attendance.objects.select_related('user'))  # Renamed attendance_set to attendance
         ).filter(**kwargs).first()
-
 
 class Attendance(models.Model):
 	first_name = models.TextField(default="")
