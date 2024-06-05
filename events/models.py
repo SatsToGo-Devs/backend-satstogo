@@ -73,6 +73,7 @@ class Attendance(models.Model):
 	event = models.ForeignKey(Event,null=True, on_delete=models.CASCADE)
 	eventSession = models.ForeignKey(EventSession, null=True, on_delete= models.CASCADE)
 	is_activated = models.BooleanField(default=False)
+	locked = models.BooleanField(default=False)
 	clock_in_time = models.DateTimeField(auto_now_add=True)
 
 	def get_by_magic_string(self, magic_string):

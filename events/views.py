@@ -76,8 +76,16 @@ class ActivateUser(APIView):
             try:
                 pk = request.data.get('pk')
                 magic_string = request.data.get('magic_string')
+                user = SatsUser.objects.get(magic_string=magic_string)
                 session = EventSession.objects.prefetch_related('parent_event').get(pk=pk)
                 parent_event = session.parent_event
+
+                alreadyActivated = Attendance.objects.get(user=user,event=parent_event,locked=True)
+                if alreadyActivated:
+                    responsedict = {'error': 'You have already registered for this event'}
+                    status = 403
+                    return Response(data=responsedict,status=status)
+
                 print(f"datetime.now(): {datetime.now().time()}")
                 formatted_datetime = datetime.now().time()
                 print(f"formatted_datetime: {formatted_datetime}")
@@ -92,14 +100,15 @@ class ActivateUser(APIView):
                     status = 403
                     is_activated = False
 
-                user = SatsUser.objects.get(magic_string=magic_string)
                 new_attendance = Attendance.objects.update_or_create(
                     user=user,
                     event=parent_event,
                     defaults={
                         "event": parent_event,
                         "eventSession": session,
-                        "is_activated":is_activated                    
+                        "is_activated":is_activated,
+                        "locked": True,
+                        "clock_in_time":datetime.today()
                     }
                 )
 
