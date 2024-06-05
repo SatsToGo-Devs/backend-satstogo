@@ -80,37 +80,37 @@ class ActivateUser(APIView):
                 session = EventSession.objects.prefetch_related('parent_event').get(pk=pk)
                 parent_event = session.parent_event
 
-                alreadyActivated = Attendance.objects.get(user=user,event=parent_event,locked=True)
-                if alreadyActivated:
-                    responsedict = {'error': 'You have already registered for this event'}
+                try:
+                    alreadyActivated = Attendance.objects.get(user=user,event=parent_event,locked=True)
+                    responsedict = {'error': 'You have already activated for this event'}
                     status = 403
                     return Response(data=responsedict,status=status)
+                except Attendance.DoesNotExist:
+                    print(f"datetime.now(): {datetime.now().time()}")
+                    formatted_datetime = datetime.now().time()
+                    print(f"formatted_datetime: {formatted_datetime}")
+                    deadline_to_time = session.deadline.time()
+                    print(f"deadline_to_time: {deadline_to_time}")
+                    if formatted_datetime < deadline_to_time:
+                        status = 200
+                        responsedict = {'message': f'Congrats!! you have won ${parent_event.reward} Sats.'}
+                        is_activated = True
+                    else:
+                        responsedict = {'error': 'Oops, you are not eligible to receive this reward'}
+                        status = 403
+                        is_activated = False
 
-                print(f"datetime.now(): {datetime.now().time()}")
-                formatted_datetime = datetime.now().time()
-                print(f"formatted_datetime: {formatted_datetime}")
-                deadline_to_time = session.deadline.time()
-                print(f"deadline_to_time: {deadline_to_time}")
-                if formatted_datetime < deadline_to_time:
-                    status = 200
-                    responsedict = {'message': f'Congrats!! you have won ${parent_event.reward} Sats.'}
-                    is_activated = True
-                else:
-                    responsedict = {'error': 'Oops, you are not eligible to receive this reward'}
-                    status = 403
-                    is_activated = False
-
-                new_attendance = Attendance.objects.update_or_create(
-                    user=user,
-                    event=parent_event,
-                    defaults={
-                        "event": parent_event,
-                        "eventSession": session,
-                        "is_activated":is_activated,
-                        "locked": True,
-                        "clock_in_time":datetime.today()
-                    }
-                )
+                    new_attendance = Attendance.objects.update_or_create(
+                        user=user,
+                        event=parent_event,
+                        defaults={
+                            "event": parent_event,
+                            "eventSession": session,
+                            "is_activated":is_activated,
+                            "locked": True,
+                            "clock_in_time":datetime.today()
+                        }
+                    )
 
             except (SatsUser.DoesNotExist, EventSession.DoesNotExist):
                 responsedict = {'error': 'User or Event does not exist'}
