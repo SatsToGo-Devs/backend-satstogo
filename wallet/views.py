@@ -30,6 +30,7 @@ INVOICE_READ_KEY = settings.INVOICE_READ_KEY
 LNURL_PAYMENTS_ENDPOINT = settings.LNURL_PAYMENTS_ENDPOINT
 BLINK_API_KEY = settings.BLINK_API_KEY
 BLINK_API_URL = settings.BLINK_API_URL
+BLINK_SATS_WALLET_ID=settings.BLINK_SATS_WALLET_ID
 
 class WalletEndpoints(APIView):
     def account(request):
@@ -61,10 +62,10 @@ class WalletEndpoints(APIView):
 
 
 class BlinkWallet():
-    wallet_id='f1b2c92d-b900-448d-841c-57aa17e03e4c'
+    wallet_id=BLINK_SATS_WALLET_ID
     headers = {
         "Content-Type": "application/json",
-        "X-API-KEY": API_KEY,
+        "X-API-KEY": BLINK_API_KEY,
         }
     def wallet_info(self):
         try:
@@ -82,7 +83,7 @@ class BlinkWallet():
                 }
                 """
             data = {"query": query, "variables": {}}
-            response = requests.post(API_URL, headers=self.headers, json=data)
+            response = requests.post(BLINK_API_URL, headers=self.headers, json=data)
 
             if response.status_code == 200:
                 data = response.json()
@@ -114,7 +115,7 @@ class BlinkWallet():
         input_data = {"amount": "18", "walletId": self.wallet_id}
         data = {"query": query, "variables": {"input": input_data}}
 
-        response = requests.post(API_URL, headers=self.headers, json=data)
+        response = requests.post(BLINK_API_URL, headers=self.headers, json=data)
         if response.status_code == 200:
             data = response.json()
             if "errors" in data:
@@ -145,7 +146,7 @@ class BlinkWallet():
         payment_request = "lnbc180n1pn97q2cpp54vkyz80s242r84j6znjznx0wwtgwezznr3nqwsenjrvdwr6twwnqdqqcqzpuxqyz5vqsp5ygnpjytaq20qf6nhd3phhr9pv7ajum9fspk4ftccdz3pwjzjn8xs9qyyssqy388a3yaf4zp5qut5chaapl7twacprrmaf9n8zenepnznm38ugche9ed6vcx7r7ypfnap8ggejem3597282pt58khvqz83zc77w7tyspgk450c"
         input_data = {"paymentRequest": payment_request, "walletId": self.wallet_id}
         data = {"query": query, "variables": {"input": input_data}}
-        response = requests.post(API_URL, headers=self.headers, json=data)
+        response = requests.post(BLINK_API_URL, headers=self.headers, json=data)
         if response.status_code == 200:
             data = response.json()
             if "errors" in data:
@@ -179,7 +180,7 @@ class BlinkWallet():
                 "walletId": self.wallet_id,
             }
         }
-        response = requests.post(API_URL, headers=self.headers, json={'query': query, 'variables': variables})
+        response = requests.post(BLINK_API_URL, headers=self.headers, json={'query': query, 'variables': variables})
 
         if response.status_code == 200:
             data = response.json()
