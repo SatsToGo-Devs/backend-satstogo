@@ -94,7 +94,7 @@ class EventReadSerializer(serializers.ModelSerializer):
     sessions = EventSessionReadSerializer(source='eventsession_set', many=True)
     class Meta:
         model = Event
-        fields = ('name', 'event_type', 'venue', 'reward', 'sessions')
+        fields = ('name', 'event_type', 'venue', 'reward','timezone','access', 'sessions')
 
 
 class EventSerializer(serializers.ModelSerializer):

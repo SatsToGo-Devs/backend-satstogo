@@ -1,7 +1,6 @@
 import requests
 from django.conf import settings
-
-# Create your views here.
+import pytz
 from rest_framework.response import Response
 from rest_framework.parsers import JSONParser
 from rest_framework.views import APIView
@@ -79,7 +78,7 @@ class ActivateUser(APIView):
                 magic_string = request.data.get('magic_string')
                 session = EventSession.objects.prefetch_related('parent_event').get(pk=pk)
                 parent_event = session.parent_event
-                formatted_datetime = datetime.now().time()
+                formatted_datetime = datetime.now().astimezone(pytz.timezone(parent_event.timezone)).time()
                 deadline_to_time = session.deadline.time()
                 if formatted_datetime < deadline_to_time:
                     status = 200
