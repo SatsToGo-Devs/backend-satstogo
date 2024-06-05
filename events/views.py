@@ -78,8 +78,11 @@ class ActivateUser(APIView):
                 magic_string = request.data.get('magic_string')
                 session = EventSession.objects.prefetch_related('parent_event').get(pk=pk)
                 parent_event = session.parent_event
+                print(f"datetime.now(): {datetime.now().time()}")
                 formatted_datetime = datetime.now().astimezone(pytz.timezone(parent_event.timezone)).time()
+                print(f"formatted_datetime: {formatted_datetime}")
                 deadline_to_time = session.deadline.time()
+                print(f"deadline_to_time: {deadline_to_time}")
                 if formatted_datetime < deadline_to_time:
                     status = 200
                     responsedict = {'message': f'Congrats!! you have won ${parent_event.reward} Sats.'}
@@ -89,15 +92,15 @@ class ActivateUser(APIView):
                     status = 403
                     is_activated = False
 
-                new_attendance = Attendance.objects.update_or_create(
-                    user__magic_string=magic_string,
-                    event=parent_event,
-                    defaults={
-                        "event": parent_event,
-                        "eventSession": session,
-                        "is_activated":is_activated                    
-                    }
-                )
+                # new_attendance = Attendance.objects.update_or_create(
+                #     user__magic_string=magic_string,
+                #     event=parent_event,
+                #     defaults={
+                #         "event": parent_event,
+                #         "eventSession": session,
+                #         "is_activated":is_activated                    
+                #     }
+                # )
 
             except (SatsUser.DoesNotExist, EventSession.DoesNotExist):
                 responsedict = {'error': 'User or Event does not exist'}
