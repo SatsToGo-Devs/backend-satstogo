@@ -216,13 +216,13 @@ class LnurlWithdrawal(APIView):
             base_uri=LnurlWithdrawal.get_base_url(request=request)
             link=LnurlWithdrawal.generate_lnurl_withdraw_callback(base_uri,magic_string)
             print(f"get_lnurl_withdraw_link: {link}")
-            return JsonResponse(response = {
+            return JsonResponse({
             "status": "OK",
             "link": link,
             })
         except Exception as e:
             print(e)
-            return JsonResponse(response = {
+            return JsonResponse({
             "status": "ERROR",
             "message": 'Request Failed',
             })
