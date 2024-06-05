@@ -234,7 +234,7 @@ class LnurlWithdrawal(APIView):
         user = SatsUser.objects.get(magic_string=magic_string)
         try:
             now_epoch = int(datetime.now().timestamp())
-            if now_epoch > expiry:
+            if now_epoch > int(expiry):
                 raise Exception('Payment Request Expired')
 
             base_uri=LnurlWithdrawal.get_base_url(request=request)
