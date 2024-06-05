@@ -2,6 +2,7 @@ import json
 import os
 from django.http import JsonResponse
 from binascii import unhexlify
+from api.serializers import SatsUserSerializer
 from api.utils.Utils import Utils
 from secp256k1 import PublicKey
 from .models import FcmToken, SatsUser,SatsUser
@@ -42,10 +43,15 @@ class AuthView(APIView):
         try:
             magic_str = request.GET.get('k1')
             user = SatsUser.objects.get(magic_string=magic_str)
+            if not user.key:
+                return JsonResponse({"status": "ERROR", "message": "Unable to Verify Magic String"})
             pubkey = PublicKey(unhexlify(user.key), raw=True)
             sig_raw = pubkey.ecdsa_deserialize(unhexlify(user.sig))
             r = pubkey.ecdsa_verify(unhexlify(magic_str), sig_raw, raw=True)
             if(r == True):
+                first_name = request.GET.get('first_name')
+                last_name = request.GET.get('last_name')
+                user.update_user_profile(last_name=last_name, first_name=first_name)
                 user.update_last_login()
                 return JsonResponse({"status": "OK"})
             else:
@@ -65,6 +71,9 @@ class AuthView(APIView):
         try:
             data = json.loads(request.body)
             firebase_token = data.get('firebase_token')
+            first_name = data.get('first_name')
+            last_name = data.get('last_name')
+            user=SatsUser.objects.create(magic_string=hex_data,first_name=first_name,last_name=last_name)
             tk = FcmToken.objects.update_or_create(magic_string=hex_data, token=firebase_token,defaults={'magic_string': hex_data,'token':firebase_token},)
         except IntegrityError as e:
             print(e)
@@ -80,6 +89,7 @@ class AuthView(APIView):
             "magic_string": hex_data,
             "auth_url": auth_url,
             "encoded": lnurl.encode(auth_url),
+            "user":SatsUserSerializer(user).data
         }
 
         return JsonResponse(response)
@@ -94,8 +104,11 @@ class AuthView(APIView):
         r = pubkey.ecdsa_verify(unhexlify(k1), sig_raw, raw=True)
         if(r == True):
             try:
-                user=SatsUser(magic_string=k1,key=key,sig=sig)
-                await sync_to_async(user.save)()
+                update_or_create_task = sync_to_async(SatsUser.objects.update_or_create)
+                user, created = await update_or_create_task(
+                    magic_string=k1,
+                    defaults={'key': key, 'sig': sig},
+                )
             except IntegrityError as e:
                 print(e)
                 

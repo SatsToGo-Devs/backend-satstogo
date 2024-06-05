@@ -27,7 +27,7 @@ class ConfirmEventSerialiazer(serializers.Serializer):
 
         if missing_fields:
             raise serializers.ValidationError({
-                'detail': f"Missing required fields: {', '.join(missing_fields)}"
+                'error': f"Missing required fields: {', '.join(missing_fields)}"
             })
 
     def user_is_allowed(self,data):
@@ -64,7 +64,7 @@ class AttendanceSerializer(serializers.ModelSerializer):
         
         if existing_match:            
             raise serializers.ValidationError({
-                'detail': f"You have already registered for this event"
+                'error': f"You have already registered for this event"
             })
 
     def validate(self, data):
@@ -94,7 +94,7 @@ class EventReadSerializer(serializers.ModelSerializer):
     sessions = EventSessionReadSerializer(source='eventsession_set', many=True)
     class Meta:
         model = Event
-        fields = ('name', 'event_type', 'venue', 'reward', 'sessions')
+        fields = ('name', 'event_type', 'venue', 'reward','timezone','access', 'sessions')
 
 
 class EventSerializer(serializers.ModelSerializer):

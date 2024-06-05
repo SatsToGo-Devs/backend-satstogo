@@ -1,7 +1,6 @@
 import requests
 from django.conf import settings
-
-# Create your views here.
+import pytz
 from rest_framework.response import Response
 from rest_framework.parsers import JSONParser
 from rest_framework.views import APIView
@@ -77,28 +76,41 @@ class ActivateUser(APIView):
             try:
                 pk = request.data.get('pk')
                 magic_string = request.data.get('magic_string')
+                user = SatsUser.objects.get(magic_string=magic_string)
                 session = EventSession.objects.prefetch_related('parent_event').get(pk=pk)
                 parent_event = session.parent_event
-                formatted_datetime = datetime.now().time()
-                deadline_to_time = session.deadline.time()
-                if formatted_datetime < deadline_to_time:
-                    status = 200
-                    responsedict = {'message': f'Congrats!! you have won ${parent_event.reward} Sats.'}
-                    is_activated = True
-                else:
-                    responsedict = {'error': 'Oops, you are not eligible to receive this reward'}
-                    status = 403
-                    is_activated = False
 
-                new_attendance = Attendance.objects.update_or_create(
-                    user__magic_string=magic_string,
-                    event=parent_event,
-                    defaults={
-                        "event": parent_event,
-                        "eventSession": session,
-                        "is_activated":is_activated                    
-                    }
-                )
+                try:
+                    alreadyActivated = Attendance.objects.get(user=user,event=parent_event,locked=True)
+                    responsedict = {'error': 'You have already activated for this event'}
+                    status = 403
+                    return Response(data=responsedict,status=status)
+                except Attendance.DoesNotExist:
+                    print(f"datetime.now(): {datetime.now().time()}")
+                    formatted_datetime = datetime.now().time()
+                    print(f"formatted_datetime: {formatted_datetime}")
+                    deadline_to_time = session.deadline.time()
+                    print(f"deadline_to_time: {deadline_to_time}")
+                    if formatted_datetime < deadline_to_time:
+                        status = 200
+                        responsedict = {'message': f'Congrats!! you have won ${parent_event.reward} Sats.'}
+                        is_activated = True
+                    else:
+                        responsedict = {'error': 'Oops, you are not eligible to receive this reward'}
+                        status = 403
+                        is_activated = False
+
+                    new_attendance = Attendance.objects.update_or_create(
+                        user=user,
+                        event=parent_event,
+                        defaults={
+                            "event": parent_event,
+                            "eventSession": session,
+                            "is_activated":is_activated,
+                            "locked": True,
+                            "clock_in_time":datetime.today()
+                        }
+                    )
 
             except (SatsUser.DoesNotExist, EventSession.DoesNotExist):
                 responsedict = {'error': 'User or Event does not exist'}
