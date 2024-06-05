@@ -1,6 +1,6 @@
 import pytz
 import datetime
-
+from django.utils import timezone
 from django.db import models
 from django.utils.timezone import now
 from api.models import SatsUser # Create your models here.
@@ -53,6 +53,8 @@ class EventSession(models.Model):
 	
 	def save(self, *args, **kwargs):
 		parent_timezone = self.parent_event.timezone
+		if not self.deadline.tzinfo:
+			self.deadline = timezone.make_aware(self.deadline, timezone.get_default_timezone())
 		self.deadline = self.deadline.astimezone(pytz.timezone(parent_timezone))
 		super(EventSession, self).save(*args, **kwargs)
 		
