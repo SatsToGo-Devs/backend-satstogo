@@ -5,7 +5,7 @@ from django.db import models
 from django.utils.timezone import now
 from api.models import SatsUser
 
-class WithdrawalRequests(models.Model):
+class WithdrawalRequest(models.Model):
 	expiry = models.BigIntegerField()
 	min_withdrawable = models.IntegerField()
 	max_withdrawable = models.IntegerField()

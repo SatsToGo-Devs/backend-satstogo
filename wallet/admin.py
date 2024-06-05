@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import WithdrawalRequests
+from .models import WithdrawalRequest
 
 # Register your models here.
-admin.site.register([WithdrawalRequests])
+admin.site.register([WithdrawalRequest])

@@ -22,7 +22,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db import IntegrityError
 from asgiref.sync import sync_to_async
 from api.models import SatsUser
-from wallet.models import WithdrawalRequests
+from wallet.models import WithdrawalRequest
 
 ADMIN_API_KEY = settings.ADMIN_API_KEY
 LNURL_ENDPOINT = settings.LNURL_ENDPOINT
@@ -238,9 +238,9 @@ class LnurlWithdrawal(APIView):
                 raise Exception('Payment Request Expired')
 
             base_uri=LnurlWithdrawal.get_base_url(request=request)
-            minWithdrawable=2
+            min_withdrawable=2
             max_withdrawable=10
-            w_req = WithdrawalRequests(expiry=expiry,user=user,max_withdrawable=max_withdrawable, minWithdrawable=minWithdrawable)
+            w_req = WithdrawalRequest(expiry=expiry,user=user,max_withdrawable=max_withdrawable, min_withdrawable=min_withdrawable)
             w_req.save()
 
             payload = {
@@ -248,7 +248,7 @@ class LnurlWithdrawal(APIView):
             "callback": f"{base_uri}wallet/confirm-withdrawal/",
             "k1": w_req.pk,
             "defaultDescription": 'SatsToGO! accumulated sats withdrawal',
-            "minWithdrawable":minWithdrawable,
+            "minWithdrawable":min_withdrawable,
             "maxWithdrawable":max_withdrawable
             }
 
@@ -261,7 +261,7 @@ class LnurlWithdrawal(APIView):
         k1 = request.GET.get('k1')
         pr = request.GET.get('pr')
         try:
-            w_req = WithdrawalRequests.objects.get(pk=k1)
+            w_req = WithdrawalRequest.objects.get(pk=k1)
             now_epoch = int(datetime.now().timestamp())
             if now_epoch > w_req.expiry:
                 raise Exception('Payment Request Expired')
