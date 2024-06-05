@@ -184,8 +184,9 @@ class BlinkWallet():
 
         if response.status_code == 200:
             data = response.json()
+            print(f"{data}")
             if "errors" in data:
-                print(f"Error estimating fee: {data['errors'][0]['message']}")
+                print(f"Error paying: {data['errors'][0]['message']}")
                 return None
             else:
                 status = data["status"]
@@ -255,7 +256,7 @@ class LnurlWithdrawal(APIView):
             return JsonResponse(payload)
         except Exception as e:
             print(e)
-            return JsonResponse({"status": "ERROR", "message": "Unable to verify"})
+            return JsonResponse({"status": "ERROR", "reason": "Unable to Initiate Payment Request"})
         
     def confirm_withdrawal(request):
         k1 = request.GET.get('k1')
@@ -278,6 +279,6 @@ class LnurlWithdrawal(APIView):
             
         except Exception as e:
             print(e)
-            return JsonResponse({"status": "ERROR", "message": "Unable to complete payment request"})
+            return JsonResponse({"status": "ERROR", "reason": "Unable to complete payment request"})
                 
 
