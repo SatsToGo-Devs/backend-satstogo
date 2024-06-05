@@ -92,8 +92,9 @@ class ActivateUser(APIView):
                     status = 403
                     is_activated = False
 
+                user = SatsUser.objects.get(magic_string=magic_string)
                 new_attendance = Attendance.objects.update_or_create(
-                    user__magic_string=magic_string,
+                    user=user,
                     event=parent_event,
                     defaults={
                         "event": parent_event,
