@@ -186,7 +186,7 @@ class BlinkWallet():
             data = response.json()['data']['lnInvoicePaymentSend']
             print(f"{data}")
 
-            if "errors" in data:
+            if "errors" in data and data["errors"]:
                 print(f"Error paying: {data['errors'][0]['message']}")
                 return None
             else:
@@ -205,7 +205,7 @@ class LnurlWithdrawal(APIView):
         else:
             return request.build_absolute_uri('/').replace('http:', 'https:')
     def generate_lnurl_withdraw_callback(base_url,magic_string):
-        five_minutes_from_now = datetime.now()+ timedelta(minutes=35) 
+        five_minutes_from_now = datetime.now()+ timedelta(minutes=5) 
         expiry = int(five_minutes_from_now.timestamp())
         withdraw_url = f"{base_url}wallet/initiate-withdrawal/?expiry={expiry}&magic_string={magic_string}"
         print(f"withdraw_url: {withdraw_url}")
@@ -220,7 +220,7 @@ class LnurlWithdrawal(APIView):
             print(f"get_lnurl_withdraw_link: {link}")
             return JsonResponse({
             "status": "OK",
-            "link": link,
+            "data": {'link':link},
             })
         except Exception as e:
             print(e)
