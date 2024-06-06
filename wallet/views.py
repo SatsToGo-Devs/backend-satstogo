@@ -294,7 +294,7 @@ class LnurlWithdrawal(APIView):
             expiry = request.GET.get('expiry')
             user = SatsUser.objects.get(magic_string=magic_string)
             w_req = WithdrawalRequest.objects.get(user=user,expiry=expiry)
-            return JsonResponse({"status": "OK","data":{"status":w_req.status}})
+            return JsonResponse({"status":w_req.status})
         except WithdrawalRequest.DoesNotExist:
             print(f"WithdrawalRequest not found: ${magic_string} === ${expiry}")
             return JsonResponse({"status": "ERROR", "message": "Withdrawal Request Not Found"})
