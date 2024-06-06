@@ -293,12 +293,16 @@ class LnurlWithdrawal(APIView):
         try:
             magic_string = request.GET.get('magic_string')
             expiry = request.GET.get('expiry')
-            w_req = WithdrawalRequest.objects.get(magic_string=magic_string,expiry=expiry)
+            user = SatsUser.objects.get(magic_string=magic_string)
+            w_req = WithdrawalRequest.objects.get(user=user,expiry=expiry)
             return JsonResponse({"status": "OK","data":{"status":w_req.status}})
         except WithdrawalRequest.DoesNotExist:
             print(f"WithdrawalRequest not found: ${magic_string} === ${expiry}")
             return JsonResponse({"status": "ERROR", "message": "Withdrawal Request Not Found"})
         except WithdrawalRequest.MultipleObjectsReturned:
             print(f"Multiple WithdrawalRequest found: ${magic_string} === ${expiry}")
-            return JsonResponse({"status": "ERROR", "message": "Multiple Withdrawal Requests Found"})        
+            return JsonResponse({"status": "ERROR", "message": "Multiple Withdrawal Requests Found"}) 
+        except SatsUser.DoesNotExist:
+            print(f"SatsUser not found with magic string:${magic_string}")
+            return JsonResponse({"status": "ERROR", "message": "User Not Found"})       
 
