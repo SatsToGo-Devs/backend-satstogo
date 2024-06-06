@@ -9,7 +9,8 @@ from datetime import datetime
 from .models import Event, Attendance,EventSession
 from api.models import SatsUser
 from .serializers import EventSerializer, EventReadSerializer, ConfirmEventSerialiazer, AttendanceSerializer
-
+import csv
+from django.http import HttpResponse
 
 ADMIN_API_KEY = settings.ADMIN_API_KEY
 LNURL_ENDPOINT = settings.LNURL_ENDPOINT
@@ -118,6 +119,20 @@ class ActivateUser(APIView):
             status = 400
 
         return Response(data=responsedict,status=status)
+
+    def export(request):
+        checkins = Attendance.objects.all().order_by('-clock_in_time')
+
+        response = HttpResponse(content_type="text/csv")
+        response['Content-Disposition'] = 'attachment; filename="attendances.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(['user', "event", "is_activated", "clock_in_time"])
+
+        for att in checkins.values_list('user', 'event', 'is_activated', 'clock_in_time'):
+            writer.writerow(att)
+
+        return response
 
 class RegisterUser(APIView):
     serializer_class = AttendanceSerializer
