@@ -195,7 +195,7 @@ class BlinkWallet():
                 return status
         else:
             print(f"Error: {response.status_code}")
-            return None
+            return "FAILURE"
         
 
 class LnurlWithdrawal(APIView):
@@ -271,18 +271,18 @@ class LnurlWithdrawal(APIView):
             blink_wallet=BlinkWallet()
             status=blink_wallet.ln_invoice_payment_send(payment_request=pr)
 
-            if status is None:
-                raise Exception('Unable to complete payment request')
-            else:
-                try:
+            try:
                     w_req.status=status.upper()
                     w_req.save()
                     consumers.WebSocketConsumer.send_message(f"user_group_{w_req.user.magic_string}",{"type": "accumulate","status": status.upper(),"message":""})
                     Utils.notifyUserViaFcm(w_req.user.magic_string,{"type": "accumulate","status": status.upper(),"message":""})
-                except Exception as e:
+            except Exception as e:
                     print(e)
 
+            if(status.upper() == "SUCCESS"):
                 return JsonResponse({"status": "OK"})
+            else:
+                return JsonResponse({"status": "ERROR","reason": "Unable to complete payment request"})
             
         except Exception as e:
             print(e)
