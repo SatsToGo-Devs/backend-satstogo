@@ -238,10 +238,14 @@ class LnurlWithdrawal(APIView):
             now_epoch = int(datetime.now().timestamp())
             if now_epoch > int(expiry):
                 raise Exception('Payment Request Expired')
+            
+            pending_req = WithdrawalRequest.objects.filter(user=user,status="PROCESSING")
+            if len(pending_req) > 0:
+                raise Exception('You have pending requests. Please wait for 5 minutes and try again')
 
             base_uri=LnurlWithdrawal.get_base_url(request=request)
             min_withdrawable=2
-            max_withdrawable=10
+            max_withdrawable=user.sats_balance
             w_req = WithdrawalRequest(expiry=expiry,user=user,max_withdrawable=max_withdrawable, min_withdrawable=min_withdrawable)
             w_req.save()
 
@@ -256,26 +260,30 @@ class LnurlWithdrawal(APIView):
 
             return JsonResponse(payload)
         except Exception as e:
-            print(e)
-            return JsonResponse({"status": "ERROR", "reason": "Unable to Initiate Payment Request"})
+            print(str(e))
+            return JsonResponse({"status": "ERROR", "reason": str(e)})
         
     def confirm_withdrawal(request):
         k1 = request.GET.get('k1')
         pr = request.GET.get('pr')
         try:
+            dc=lnurl.decode(pr)
+            print(f"invoice: ${dc}")
             w_req = WithdrawalRequest.objects.get(pk=k1)
             now_epoch = int(datetime.now().timestamp())
             if now_epoch > w_req.expiry:
                 raise Exception('Payment Request Expired')
+            if  w_req.status != "PROCESSING":
+                raise Exception('Payment Request Already Processed')
             
             blink_wallet=BlinkWallet()
             status=blink_wallet.ln_invoice_payment_send(payment_request=pr)
 
             try:
-                    w_req.status=status.upper()
-                    w_req.save()
-                    consumers.WebSocketConsumer.send_message(f"user_group_{w_req.user.magic_string}",{"type": "accumulate","status": status.upper(),"message":""})
-                    Utils.notifyUserViaFcm(w_req.user.magic_string,{"type": "accumulate","status": status.upper(),"message":""})
+                w_req.status=status.upper()
+                w_req.save()
+                consumers.WebSocketConsumer.send_message(f"user_group_{w_req.user.magic_string}",{"type": "accumulate","status": status.upper(),"message":""})
+                Utils.notifyUserViaFcm(w_req.user.magic_string,{"type": "accumulate","status": status.upper(),"message":""})
             except Exception as e:
                     print(e)
 
@@ -285,8 +293,8 @@ class LnurlWithdrawal(APIView):
                 return JsonResponse({"status": "ERROR","reason": "Unable to complete payment request"})
             
         except Exception as e:
-            print(e)
-            return JsonResponse({"status": "ERROR", "reason": "Unable to complete payment request"})
+            print(str(e))
+            return JsonResponse({"status": "ERROR", "reason": str(e)})
     
     def poll_withdrawal_request(request):
         try:

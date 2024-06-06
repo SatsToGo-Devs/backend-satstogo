@@ -79,7 +79,6 @@ class ActivateUser(APIView):
                 user = SatsUser.objects.get(magic_string=magic_string)
                 session = EventSession.objects.prefetch_related('parent_event').get(pk=pk)
                 parent_event = session.parent_event
-
                 try:
                     alreadyActivated = Attendance.objects.get(user=user,event=parent_event,locked=True)
                     responsedict = {'error': 'You have already activated for this event'}
@@ -92,6 +91,7 @@ class ActivateUser(APIView):
                     deadline_to_time = session.deadline.time()
                     print(f"deadline_to_time: {deadline_to_time}")
                     if formatted_datetime < deadline_to_time:
+                        user.update_sats_balance(user.sats_balance+parent_event.reward)
                         status = 200
                         responsedict = {'message': f'Congrats!! you have won ${parent_event.reward} Sats.'}
                         is_activated = True
@@ -99,7 +99,6 @@ class ActivateUser(APIView):
                         responsedict = {'error': 'Oops, you are not eligible to receive this reward'}
                         status = 403
                         is_activated = False
-
                     new_attendance = Attendance.objects.update_or_create(
                         user=user,
                         event=parent_event,
@@ -111,7 +110,6 @@ class ActivateUser(APIView):
                             "clock_in_time":datetime.today()
                         }
                     )
-
             except (SatsUser.DoesNotExist, EventSession.DoesNotExist):
                 responsedict = {'error': 'User or Event does not exist'}
                 status = 404
