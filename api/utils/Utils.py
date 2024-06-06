@@ -19,11 +19,11 @@ class Utils:
         except Exception as e:
             print(f"An error occurred while sending FCM: {e}")
 
-    async def notifyUserViaFcm(magic_str):
+    async def notifyUserViaFcm(magic_str,notif):
         try:
             print(f"magic_str: {magic_str}")
             fcmToken = await sync_to_async(FcmToken.objects.get)(magic_string=magic_str)
             print(f"FCM: {fcmToken}")
-            Utils.send_notification([fcmToken.token],{"type": "auth_verification","status": "OK","message":"Verification Successful"})
+            Utils.send_notification([fcmToken.token],notif)
         except Exception as e:
             print(f"An error occurred while sending FCM: {e}")

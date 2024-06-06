@@ -204,9 +204,7 @@ class LnurlWithdrawal(APIView):
             return request.build_absolute_uri('/')
         else:
             return request.build_absolute_uri('/').replace('http:', 'https:')
-    def generate_lnurl_withdraw_callback(base_url,magic_string):
-        five_minutes_from_now = datetime.now()+ timedelta(minutes=5) 
-        expiry = int(five_minutes_from_now.timestamp())
+    def generate_lnurl_withdraw_callback(base_url,magic_string,expiry):
         withdraw_url = f"{base_url}wallet/initiate-withdrawal/?expiry={expiry}&magic_string={magic_string}"
         print(f"withdraw_url: {withdraw_url}")
         return lnurl.encode(withdraw_url)
@@ -215,12 +213,14 @@ class LnurlWithdrawal(APIView):
     def get_lnurl_withdraw_link(request):
         try:
             magic_string = request.GET.get('magic_string')
+            five_minutes_from_now = datetime.now()+ timedelta(minutes=5) 
+            expiry = int(five_minutes_from_now.timestamp())
             base_uri=LnurlWithdrawal.get_base_url(request=request)
-            link=LnurlWithdrawal.generate_lnurl_withdraw_callback(base_uri,magic_string)
+            link=LnurlWithdrawal.generate_lnurl_withdraw_callback(base_uri,magic_string,expiry)
             print(f"get_lnurl_withdraw_link: {link}")
             return JsonResponse({
             "status": "OK",
-            "data": {'link':link},
+            "data": {'link':link,'expiry':expiry},
             })
         except Exception as e:
             print(e)
@@ -274,12 +274,31 @@ class LnurlWithdrawal(APIView):
             if status is None:
                 raise Exception('Unable to complete payment request')
             else:
-                w_req.funds_claimed=True
-                w_req.save()
+                try:
+                    w_req.funds_claimed=True
+                    w_req.status=status.upper()
+                    w_req.save()
+                    consumers.WebSocketConsumer.send_message(f"user_group_{w_req.user.magic_string}",{"type": "accumulate","status": "OK","message":"Withdrawal Successful"})
+                    Utils.notifyUserViaFcm(w_req.user.magic_string,{"type": "accumulate","status": "OK","message":"Withdrawal Successful"})
+                except Exception as e:
+                    print(e)
+
                 return JsonResponse({"status": "OK"})
             
         except Exception as e:
             print(e)
             return JsonResponse({"status": "ERROR", "reason": "Unable to complete payment request"})
-                
+    
+    def poll_withdrawal_request(request):
+        try:
+            magic_string = request.GET.get('magic_string')
+            expiry = request.GET.get('expiry')
+            w_req = WithdrawalRequest.objects.get(magic_string=magic_string,expiry=expiry)
+            return JsonResponse({"status": "OK","data":{"status":w_req.status}})
+        except WithdrawalRequest.DoesNotExist:
+            print(f"WithdrawalRequest not found: ${magic_string} === ${expiry}")
+            return JsonResponse({"status": "ERROR", "message": "Withdrawal Request Not Found"})
+        except WithdrawalRequest.MultipleObjectsReturned:
+            print(f"Multiple WithdrawalRequest found: ${magic_string} === ${expiry}")
+            return JsonResponse({"status": "ERROR", "message": "Multiple Withdrawal Requests Found"})        
 

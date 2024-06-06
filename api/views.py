@@ -98,7 +98,7 @@ class AuthView(APIView):
                 print(e)
                 
             await consumers.WebSocketConsumer.send_message(f"user_group_{k1}",{"type": "auth_verification","status": "OK","message":"Verification Successful"})
-            await Utils.notifyUserViaFcm(k1)
+            await Utils.notifyUserViaFcm(k1,{"type": "auth_verification","status": "OK","message":"Verification Successful"})
             return JsonResponse({"status": "OK"})
         else:
             return JsonResponse({"status": "ERROR", "message": "Unable to verify"})

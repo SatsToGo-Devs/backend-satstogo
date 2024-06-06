@@ -6,12 +6,20 @@ from django.utils.timezone import now
 from api.models import SatsUser
 
 class WithdrawalRequest(models.Model):
+	WITHDRAWAL_STATUS = (
+		('PROCESSING', 'PROCESSING'),
+		('FAILURE', 'FAILURE'),
+		('EXPIRED', 'EXPIRED'),
+		('SUCCESS', 'SUCCESS')
+	)
+		
 	expiry = models.BigIntegerField()
 	min_withdrawable = models.IntegerField()
 	max_withdrawable = models.IntegerField()
 	amount_withdrawn = models.IntegerField(null=True)
 	user = models.ForeignKey(SatsUser, on_delete=models.CASCADE)
 	funds_claimed = models.BooleanField(default=False)
+	status  = models.TextField(max_length=20,choices=WITHDRAWAL_STATUS,default='PROCESSING')
 	created_at = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):

@@ -8,4 +8,5 @@ urlpatterns = [
     path('get-withdrawal-link/', LnurlWithdrawal.get_lnurl_withdraw_link, name='get-withdrawal-link'),
     path('initiate-withdrawal/', LnurlWithdrawal.initiate_withdrawal, name='initiate-withdrawal'),
     path('confirm-withdrawal/', LnurlWithdrawal.confirm_withdrawal, name='confirm-withdrawal'),
+    path('poll-withdrawal/', LnurlWithdrawal.poll_withdrawal_request, name='poll-withdrawal'),
 ]
