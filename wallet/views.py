@@ -277,8 +277,8 @@ class LnurlWithdrawal(APIView):
                 try:
                     w_req.status=status.upper()
                     w_req.save()
-                    consumers.WebSocketConsumer.send_message(f"user_group_{w_req.user.magic_string}",{"type": "accumulate","withdrawal_status": status.upper(),"message":""})
-                    Utils.notifyUserViaFcm(w_req.user.magic_string,{"type": "accumulate","withdrawal_status": status.upper(),"message":""})
+                    consumers.WebSocketConsumer.send_message(f"user_group_{w_req.user.magic_string}",{"type": "accumulate","status": status.upper(),"message":""})
+                    Utils.notifyUserViaFcm(w_req.user.magic_string,{"type": "accumulate","status": status.upper(),"message":""})
                 except Exception as e:
                     print(e)
 
