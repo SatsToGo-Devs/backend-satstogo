@@ -130,7 +130,8 @@ class ActivateUser(APIView):
         writer.writerow(['user', 'sats_balance', "event", "reward", "is_activated", "clock_in_time"])
 
         for att in checkins:
-            writer.writerow(["${att.user.first_name} ${att.user.last_name}",att.user.sats_balance, att.event.name,att.event.reward, att.is_activated, att.clock_in_time])
+            print(f"att: ${att}")
+            writer.writerow([f"${att.user.first_name} ${att.user.last_name}",att.user.sats_balance, att.event.name,att.event.reward, att.is_activated, att.clock_in_time])
 
         return response
 
