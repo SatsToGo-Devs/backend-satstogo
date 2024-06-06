@@ -240,7 +240,7 @@ class LnurlWithdrawal(APIView):
             if now_epoch > int(expiry):
                 raise Exception('Payment Request Expired')
             
-            pending_req = WithdrawalRequest.objects.filter(user=user,status="PROCESSING")
+            pending_req = WithdrawalRequest.objects.filter(user=user,expiry__gt=now_epoch,status="PROCESSING")
             if len(pending_req) > 0:
                 raise Exception('You have pending requests. Please wait for 5 minutes and try again')
 
@@ -271,11 +271,14 @@ class LnurlWithdrawal(APIView):
             invoice=bolt11_decode(pr)
             print(f"invoice: ${invoice}")
             w_req = WithdrawalRequest.objects.get(pk=k1)
+            user = SatsUser.objects.get(magic_string=w_req.user.magic_string)
             now_epoch = int(datetime.now().timestamp())
             if now_epoch > w_req.expiry:
                 raise Exception('Payment Request Expired')
             if  w_req.status != "PROCESSING":
                 raise Exception('Payment Request Already Processed')
+            if invoice.amount_msat>user.sats_balance:
+                raise Exception('Amount is higher than your accumulated sats balance')
             
             blink_wallet=BlinkWallet()
             status=blink_wallet.ln_invoice_payment_send(payment_request=pr)
