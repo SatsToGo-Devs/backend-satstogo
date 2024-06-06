@@ -287,8 +287,8 @@ class LnurlWithdrawal(APIView):
                 w_req.status=status.upper()
                 w_req.amount_withdrawn=invoice.amount_msat / 1000
                 w_req.save()
-                consumers.WebSocketConsumer.send_message(f"user_group_{w_req.user.magic_string}",{"type": "accumulate","status": status.upper(),"message":""})
-                Utils.notifyUserViaFcm(w_req.user.magic_string,{"type": "accumulate","status": status.upper(),"message":""})
+                consumers.WebSocketConsumer.send_message(f"user_group_{w_req.user.magic_string}",{"type": "accumulate","status": status.upper(),"message":"","data":{"amount":invoice.amount_msat / 1000}})
+                Utils.notifyUserViaFcm(w_req.user.magic_string,{"type": "accumulate","status": status.upper(),"message":"","data":{"amount":invoice.amount_msat / 1000}})
             except Exception as e:
                     print(e)
 
@@ -309,7 +309,7 @@ class LnurlWithdrawal(APIView):
             expiry = request.GET.get('expiry')
             user = SatsUser.objects.get(magic_string=magic_string)
             w_req = WithdrawalRequest.objects.get(user=user,expiry=expiry)
-            return JsonResponse({"status":w_req.status})
+            return JsonResponse({"status":w_req.status,"data":{"amount":w_req.amount_withdrawn}})
         except WithdrawalRequest.DoesNotExist:
             print(f"WithdrawalRequest not found: ${magic_string} === ${expiry}")
             return JsonResponse({"status": "ERROR", "message": "Withdrawal Request Not Found"})
