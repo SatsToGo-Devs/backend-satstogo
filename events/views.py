@@ -121,7 +121,7 @@ class ActivateUser(APIView):
         return Response(data=responsedict,status=status)
 
     def export(request):
-        checkins = Attendance.objects.all().select_related('user', 'event').order_by('-clock_in_time')
+        checkins = Attendance.objects.all().filter(event__isnull=False).select_related('user', 'event').order_by('-clock_in_time')
 
         response = HttpResponse(content_type="text/csv")
         response['Content-Disposition'] = 'attachment; filename="attendances.csv"'
