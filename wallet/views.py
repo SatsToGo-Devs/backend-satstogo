@@ -188,7 +188,7 @@ class BlinkWallet():
 
             if "errors" in data and data["errors"]:
                 print(f"Error paying: {data['errors'][0]['message']}")
-                return None
+                return data["status"]
             else:
                 status = data["status"]
                 print(f"Blink Invoice Payment: {status}")
@@ -275,11 +275,10 @@ class LnurlWithdrawal(APIView):
                 raise Exception('Unable to complete payment request')
             else:
                 try:
-                    w_req.funds_claimed=True
                     w_req.status=status.upper()
                     w_req.save()
-                    consumers.WebSocketConsumer.send_message(f"user_group_{w_req.user.magic_string}",{"type": "accumulate","status": "OK","message":"Withdrawal Successful"})
-                    Utils.notifyUserViaFcm(w_req.user.magic_string,{"type": "accumulate","status": "OK","message":"Withdrawal Successful"})
+                    consumers.WebSocketConsumer.send_message(f"user_group_{w_req.user.magic_string}",{"type": "accumulate","status": status.upper(),"message":""})
+                    Utils.notifyUserViaFcm(w_req.user.magic_string,{"type": "accumulate","status": status.upper(),"message":""})
                 except Exception as e:
                     print(e)
 
