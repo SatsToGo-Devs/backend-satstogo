@@ -121,16 +121,16 @@ class ActivateUser(APIView):
         return Response(data=responsedict,status=status)
 
     def export(request):
-        checkins = Attendance.objects.all().order_by('-clock_in_time')
+        checkins = Attendance.objects.all().select_related('user', 'event').order_by('-clock_in_time')
 
         response = HttpResponse(content_type="text/csv")
         response['Content-Disposition'] = 'attachment; filename="attendances.csv"'
 
         writer = csv.writer(response)
-        writer.writerow(['user', "event", "is_activated", "clock_in_time"])
+        writer.writerow(['user', 'sats_balance', "event", "reward", "is_activated", "clock_in_time"])
 
-        for att in checkins.values_list('user', 'event', 'is_activated', 'clock_in_time'):
-            writer.writerow(att)
+        for att in checkins:
+            writer.writerow(["${att.user.first_name} ${att.user.last_name}",att.user.sats_balance, att.event.name,att.event.reward, att.is_activated, att.clock_in_time])
 
         return response
 
