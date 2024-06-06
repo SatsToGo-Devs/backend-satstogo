@@ -8,6 +8,7 @@ import os
 import random
 import string
 import lnurl
+from bolt11 import decode as bolt11_decode
 import random
 import requests
 from datetime import datetime, timedelta
@@ -267,8 +268,8 @@ class LnurlWithdrawal(APIView):
         k1 = request.GET.get('k1')
         pr = request.GET.get('pr')
         try:
-            dc=lnurl.decode(pr)
-            print(f"invoice: ${dc}")
+            invoice=bolt11_decode(pr)
+            print(f"invoice: ${invoice}")
             w_req = WithdrawalRequest.objects.get(pk=k1)
             now_epoch = int(datetime.now().timestamp())
             if now_epoch > w_req.expiry:
@@ -281,6 +282,7 @@ class LnurlWithdrawal(APIView):
 
             try:
                 w_req.status=status.upper()
+                w_req.amount_withdrawn=invoice.amount_msat
                 w_req.save()
                 consumers.WebSocketConsumer.send_message(f"user_group_{w_req.user.magic_string}",{"type": "accumulate","status": status.upper(),"message":""})
                 Utils.notifyUserViaFcm(w_req.user.magic_string,{"type": "accumulate","status": status.upper(),"message":""})
@@ -288,6 +290,8 @@ class LnurlWithdrawal(APIView):
                     print(e)
 
             if(status.upper() == "SUCCESS"):
+                user = SatsUser.objects.get(magic_string=w_req.user.magic_string)
+                user.update_sats_balance(amount_sats=user.sats_balance - invoice.amount_msat)
                 return JsonResponse({"status": "OK"})
             else:
                 return JsonResponse({"status": "ERROR","reason": "Unable to complete payment request"})
