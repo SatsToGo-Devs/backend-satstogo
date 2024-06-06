@@ -255,8 +255,8 @@ class LnurlWithdrawal(APIView):
             "callback": f"{base_uri}wallet/confirm-withdrawal/",
             "k1": w_req.pk,
             "defaultDescription": 'SatsToGO! accumulated sats withdrawal',
-            "minWithdrawable":min_withdrawable,
-            "maxWithdrawable":max_withdrawable
+            "minWithdrawable":min_withdrawable * 1000,
+            "maxWithdrawable":max_withdrawable * 1000
             }
 
             return JsonResponse(payload)
@@ -277,7 +277,7 @@ class LnurlWithdrawal(APIView):
                 raise Exception('Payment Request Expired')
             if  w_req.status != "PROCESSING":
                 raise Exception('Payment Request Already Processed')
-            if invoice.amount_msat>user.sats_balance:
+            if invoice.amount_msat>user.sats_balance * 1000:
                 raise Exception('Amount is higher than your accumulated sats balance')
             
             blink_wallet=BlinkWallet()
@@ -285,7 +285,7 @@ class LnurlWithdrawal(APIView):
 
             try:
                 w_req.status=status.upper()
-                w_req.amount_withdrawn=invoice.amount_msat
+                w_req.amount_withdrawn=invoice.amount_msat / 1000
                 w_req.save()
                 consumers.WebSocketConsumer.send_message(f"user_group_{w_req.user.magic_string}",{"type": "accumulate","status": status.upper(),"message":""})
                 Utils.notifyUserViaFcm(w_req.user.magic_string,{"type": "accumulate","status": status.upper(),"message":""})
@@ -294,7 +294,7 @@ class LnurlWithdrawal(APIView):
 
             if(status.upper() == "SUCCESS"):
                 user = SatsUser.objects.get(magic_string=w_req.user.magic_string)
-                user.update_sats_balance(amount_sats=user.sats_balance - invoice.amount_msat)
+                user.update_sats_balance(amount_sats=user.sats_balance - (invoice.amount_msat / 1000))
                 return JsonResponse({"status": "OK"})
             else:
                 return JsonResponse({"status": "ERROR","reason": "Unable to complete payment request"})
