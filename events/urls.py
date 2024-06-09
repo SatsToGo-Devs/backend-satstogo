@@ -9,7 +9,7 @@ urlpatterns = [
     path('withdraw', RewardView.as_view()),  # This is the reward endpoint
     path('callback', WithdrawCallbackView.as_view()),
     path('', EventCrud.as_view(), name='events'),
-
+    path('export', ActivateUser.export, name='export'),
 ]
 
 

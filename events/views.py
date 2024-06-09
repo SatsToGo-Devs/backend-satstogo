@@ -9,7 +9,8 @@ from datetime import datetime
 from .models import Event, Attendance,EventSession
 from api.models import SatsUser
 from .serializers import EventSerializer, EventReadSerializer, ConfirmEventSerialiazer, AttendanceSerializer
-
+import csv
+from django.http import HttpResponse
 
 ADMIN_API_KEY = settings.ADMIN_API_KEY
 LNURL_ENDPOINT = settings.LNURL_ENDPOINT
@@ -79,7 +80,6 @@ class ActivateUser(APIView):
                 user = SatsUser.objects.get(magic_string=magic_string)
                 session = EventSession.objects.prefetch_related('parent_event').get(pk=pk)
                 parent_event = session.parent_event
-
                 try:
                     alreadyActivated = Attendance.objects.get(user=user,event=parent_event,locked=True)
                     responsedict = {'error': 'You have already activated for this event'}
@@ -92,6 +92,7 @@ class ActivateUser(APIView):
                     deadline_to_time = session.deadline.time()
                     print(f"deadline_to_time: {deadline_to_time}")
                     if formatted_datetime < deadline_to_time:
+                        user.update_sats_balance(user.sats_balance+parent_event.reward)
                         status = 200
                         responsedict = {'message': f'Congrats!! you have won ${parent_event.reward} Sats.'}
                         is_activated = True
@@ -99,7 +100,6 @@ class ActivateUser(APIView):
                         responsedict = {'error': 'Oops, you are not eligible to receive this reward'}
                         status = 403
                         is_activated = False
-
                     new_attendance = Attendance.objects.update_or_create(
                         user=user,
                         event=parent_event,
@@ -111,7 +111,6 @@ class ActivateUser(APIView):
                             "clock_in_time":datetime.today()
                         }
                     )
-
             except (SatsUser.DoesNotExist, EventSession.DoesNotExist):
                 responsedict = {'error': 'User or Event does not exist'}
                 status = 404
@@ -120,6 +119,21 @@ class ActivateUser(APIView):
             status = 400
 
         return Response(data=responsedict,status=status)
+
+    def export(request):
+        checkins = Attendance.objects.all().filter(event__isnull=False).select_related('user', 'event').order_by('-clock_in_time')
+
+        response = HttpResponse(content_type="text/csv")
+        response['Content-Disposition'] = 'attachment; filename="attendances.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(['user', 'sats_balance', "event", "reward", "is_activated", "clock_in_time"])
+
+        for att in checkins:
+            print(f"att: ${att}")
+            writer.writerow([f"${att.user.first_name} ${att.user.last_name}",att.user.sats_balance, att.event.name,att.event.reward, att.is_activated, att.clock_in_time])
+
+        return response
 
 class RegisterUser(APIView):
     serializer_class = AttendanceSerializer

@@ -3,7 +3,11 @@ asgiref==3.7.2
 attrs==23.2.0
 autobahn==23.6.2
 Automat==22.10.0
+base58==2.1.1
 bech32==1.2.0
+bitarray==2.9.2
+bitstring==4.2.3
+bolt11==2.0.6
 CacheControl==0.14.0
 cachetools==5.3.3
 certifi==2024.2.2
@@ -18,6 +22,7 @@ dj-database-url==2.1.0
 Django==4.2.11
 django-cors-headers==4.3.1
 djangorestframework==3.15.0
+ecdsa==0.19.0
 firebase-admin==6.5.0
 google-api-core==2.19.0
 google-api-python-client==2.129.0
