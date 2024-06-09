@@ -48,12 +48,14 @@ class EventSession(models.Model):
 	title = models.TextField()
 	parent_event = models.ForeignKey(Event,on_delete=models.CASCADE)
 	deadline = models.DateTimeField()
+	deadline_string = models.CharField(null=True, blank=True)
 	def __str__(self):
 		return f"ID: {self.pk} - Name: {self.title}"
 	
 	def save(self, *args, **kwargs):
 		parent_timezone = self.parent_event.timezone
 		self.deadline = self.deadline.astimezone(pytz.timezone(parent_timezone))
+		self.deadline_string=self.deadline.strftime('%m/%d/%Y %H:%M')
 		super(EventSession, self).save(*args, **kwargs)
 		
 
