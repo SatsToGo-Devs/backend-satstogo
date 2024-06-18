@@ -31,6 +31,7 @@ class EventCrud(APIView):
             }, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
     def create(self, request):
         # Override create to handle attendee data (assuming data format)
         serializer = self.get_serializer(data=request.data)
@@ -100,7 +101,7 @@ class ActivateUser(APIView):
                         responsedict = {'error': 'Oops, you are not eligible to receive this reward'}
                         status = 403
                         is_activated = False
-                    new_attendance = Attendance.objects.update_or_create(
+                    Attendance.objects.update_or_create(
                         user=user,
                         event=parent_event,
                         defaults={

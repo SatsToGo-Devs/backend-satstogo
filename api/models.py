@@ -54,7 +54,21 @@ class User(AbstractUser):
 		self.last_login = timezone.now()
 		self.save(update_fields=['last_login'])
 
-class SatsUser(models.Model):
+class Organizer(models.Model):
+	name = models.TextField(unique=True)
+	email = models.EmailField(unique=True)
+	password =  models.TextField(max_length=50)
+	logo = models.ImageField(upload_to='/logos', blank=True)
+
+	def __str__(self) -> str:
+		return self.name
+	
+	def get_url_link(self):
+		return self.name.strip()
+
+	
+		
+class SatsUser(models.Model):	
 	magic_string = models.TextField(unique=True)
 	first_name = models.TextField(default="",null=True,)
 	last_name = models.TextField(default="",null=True)
@@ -80,6 +94,7 @@ class SatsUser(models.Model):
 	def update_sats_balance(self,amount_sats):
 		self.sats_balance = amount_sats
 		self.save(update_fields=['sats_balance'])
+
 
 class FcmToken(models.Model):
 	magic_string = models.TextField(unique=True)

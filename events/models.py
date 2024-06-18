@@ -3,7 +3,7 @@ import datetime
 
 from django.db import models
 from django.utils.timezone import now
-from api.models import SatsUser
+from api.models import SatsUser, Organizer
 
 class Event(models.Model):
 	EVENT_TYPE_CHOICES = (
@@ -24,6 +24,7 @@ class Event(models.Model):
 	access  = models.TextField(max_length=20,choices=EVENT_ACCESS_CHOICES,default='public')
 	venue = models.TextField()
 	reward = models.IntegerField()
+	owner  = models.ForeignKey(Organizer,on_delete=models.CASCADE,null=True)
 	timezone = models.CharField(max_length=50, choices=TIMEZONE_CHOICES)
 	created_at = models.DateTimeField(auto_now_add=True)
 	access = models.CharField(max_length=30, choices=EVENT_ACCESS_CHOICES)
